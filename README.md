@@ -13,6 +13,7 @@ Tg_app_ui → HTTP Server → Queuery → Processing Pipeline → Weaviate Vecto
 
 ```
 RAG/
+radar-ai/
 ├── src/
 │   ├── download/                    # Модули загрузки и приема данных
 │   │   ├── downloader_functions.py # Загрузка и подготовка данных (с NER)
@@ -29,12 +30,117 @@ RAG/
 │   │       ├── sys_prompt.py       # System prompt для LLM
 │   │       └── output.py           # Рендеринг в HTML/PDF
 │   │
-├── parser/                         # Директория с данными и парсеры
-│   └── test_news.json             # Тестовые новости (10 штук)
-│
-├── docker-compose.yml             # Docker конфигурация
-├── requirements.txt               # Python зависимости
-└── .env                          # API ключи (не в git)
+├── paser/               # Основная система агрегации новостей
+│   ├── docker-compose.yml        # Docker конфигурация
+│   ├── .env.example              # Пример переменных окружения
+│   ├── requirements.txt          # Python зависимости
+│   ├── alembic.ini               # Конфигурация миграций
+│   ├── migrations/               # Миграции базы данных
+│   │   └── versions/
+│   ├── config/                   # Конфигурационные файлы
+│   │   ├── sources.yml           # Настройки источников
+│   │   └── ad_rules.yml          # Правила фильтрации рекламы
+│   ├── src/
+│   │   ├── __init__.py
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py
+│   │   │   ├── database.py
+│   │   │   └── models.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── telegram_parser/
+│   │   │   ├── __init__.py
+│   │   │   ├── client.py
+│   │   │   ├── parser.py
+│   │   │   └── antispam.py
+│   │   ├── enricher/
+│   │   │   ├── __init__.py
+│   │   │   ├── ner_extractor.py
+│   │   │   ├── moex_linker.py
+│   │   │   ├── topic_classifier.py
+│   │   │   ├── company_aliases.py
+│   │   │   ├── enrichment_service.py
+│   │   │   ├── moex_auto_search.py
+│   │   │   └── sector_mapper.py
+│   │   ├── html_parser/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_html_parser.py
+│   │   │   ├── html_parser_service.py
+│   │   │   ├── forbes_parser.py
+│   │   │   ├── interfax_parser.py
+│   │   │   ├── moex_parser.py
+│   │   │   ├── edisclosure_parser.py
+│   │   │   └── edisclosure_messages_parser.py
+│   │   ├── events/
+│   │   │   ├── __init__.py
+│   │   │   ├── event_extractor.py
+│   │   │   ├── cmnln_engine.py
+│   │   │   ├── causal_chains_engine.py
+│   │   │   ├── ceg_realtime_service.py
+│   │   │   ├── enhanced_evidence_engine.py
+│   │   │   ├── event_prediction.py
+│   │   │   ├── historical_backfill_service.py
+│   │   │   ├── importance_calculator.py
+│   │   │   └── watchers.py
+│   │   ├── moex/
+│   │   │   ├── __init__.py
+│   │   │   └── moex_prices.py
+│   │   ├── ml/
+│   │   │   ├── news_clustering.py
+│   │   │   └── sentiment_analyzer.py
+│   │   ├── analytics/
+│   │   │   └── dashboard.py
+│   │   ├── outbox/
+│   │   │   ├── __init__.py
+│   │   │   ├── relay.py
+│   │   │   └── publisher.py
+│   │   ├── storage/
+│   │   │   ├── __init__.py
+│   │   │   ├── news_repository.py
+│   │   │   └── image_service.py
+│   │   ├── cache_service.py
+│   │   ├── covariance_service.py
+│   │   ├── event_bus.py
+│   │   ├── impact_calculator.py
+│   │   ├── market_data_service.py
+│   │   ├── news_trigger.py
+│   │   └── trading_signals.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── historical.py
+│   │   ├── schemas.py
+│   │   ├── websocket.py
+│   │   └── endpoints/
+│   │       ├── __init__.py
+│   │       ├── news.py
+│   │       ├── sources.py
+│   │       ├── health.py
+│   │       ├── jobs.py
+│   │       ├── ceg.py
+│   │       ├── importance.py
+│   │       ├── watchers.py
+│   │       └── images.py
+│   ├── middleware/
+│   │   └── rate_limiter.py
+│   ├── integrations/
+│   │   └── trading_signals.py
+│   ├── workers/
+│   │   └── impact_worker.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── logging.py
+│   │   └── text_utils.py
+│   └── graph_models.py
+├── tests/
+│   ├── fixtures/
+│   └── test_*.py
+└── scripts/
+    ├── start_telegram_parser.py
+    ├── start_enricher.py
+    ├── start_outbox_relay.py
+    └── start_api.py
 ```
 
 ## 🚀 Быстрый старт
