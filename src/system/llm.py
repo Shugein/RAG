@@ -56,17 +56,19 @@ def generate_llm_response(text, reasoning_level="low"):
     messages=[
         {
         "role": "user",
-        "content": "What is the meaning of life?"
+        "content": text
         }
     ]
     )
     return completion.choices[0].message.content
 
-# test
-text = 'Оспа обезьян характеризуется более высокой летальностью'
-reasoning_l = 'low'
-print(generate_llm_response(text, reasoning_l))
-
 
 ## // TODO
 #==== local model ====
+
+
+# CLI Test
+if __name__ == "__main__":
+    text = 'Оспа обезьян характеризуется более высокой летальностью'
+    reasoning_l = 'low'
+    print(generate_llm_response(text, reasoning_l))

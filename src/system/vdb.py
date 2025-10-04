@@ -1,4 +1,4 @@
-from src.data import downloader_functions as d_f
+from src.download import downloader_functions as d_f
 import tqdm
 
 import torch
@@ -32,6 +32,11 @@ if client.collections.exists(COLL_NAME):
 # Создаём новую коллекцию с расширенной схемой
 collection = client.collections.create(
     name=COLL_NAME,
+    vectorizer_config=Configure.Vectorizer.text2vec_transformers(
+        vectorize_collection_name=False
+    ),
+    # Включаем reranker для коллекции
+    reranker_config=Configure.Reranker.transformers(),
     properties=[
         # Основные текстовые поля (original_text будет векторизироваться автоматически)
         wc.Property(name="text_for_bm25", data_type=wc.DataType.TEXT, skip_vectorization=True),
@@ -50,15 +55,6 @@ collection = client.collections.create(
         wc.Property(name="url", data_type=wc.DataType.TEXT, skip_vectorization=True),
         wc.Property(name="source", data_type=wc.DataType.TEXT, skip_vectorization=True),
     ],
-    # Используем GPU-ускоренный векторайзер из Docker контейнера
-    vector_config=[
-        Configure.Vectors.text2vec_transformers(
-            name="title_vector",
-            source_properties=["title"],
-            pooling_strategy="masked_mean",           # пример параметра
-            inference_url="http://text2vec-transformers:8080"  # если несколько контейнеров
-        )
-    ],
 )
 
 print(f"Created collection: {COLL_NAME}")
@@ -71,7 +67,7 @@ print(f"Prepared {len(weaviate_data)} chunks for insertion")
 # Загрузка данных с автоматической GPU векторизацией
 print("Inserting data with automatic GPU vectorization...")
 
-with collection.batch.fixed_size(batch_size=100) as batch:
+with collection.batch.fixed_size(batch_size=32) as batch:
     for i, doc in enumerate(tqdm.tqdm(weaviate_data, desc="Inserting documents")):
         # Weaviate автоматически векторизирует original_text с помощью GPU
         batch.add_object(
@@ -89,7 +85,7 @@ with collection.batch.fixed_size(batch_size=100) as batch:
             uuid=doc.metadata["id"]
         )
 
-        if batch.number_errors > 10:
+        if batch.number_errors > 50:
             print(f"Batch import stopped due to excessive errors at document {i}")
             break
 

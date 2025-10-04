@@ -1,75 +1,212 @@
+"""
+RAG Pipeline Engine
+Основной модуль для поиска и генерации ответов
+"""
+import logging
 import time
-import torch
-
-# Начало отсчета времени выполнения
-start_total = time.time()
-
-# Загрузка модулей
-print("Loading modules...")
-start_modules = time.time()
-
-from src.system import search
+from typing import List, Dict, Any
 import weaviate
-import weaviate.classes.config as wc
+
+from src.system import search, llm
+
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
-end_modules = time.time()
-print(f"Modules loaded in: {end_modules - start_modules:.2f} seconds")
+class RAGPipeline:
+    """RAG пайплайн для поиска и генерации ответов"""
 
-# Определение устройства
-start_device = time.time()
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-elif torch.backends.mps.is_available():
-    # Apple Silicon
-    device = torch.device("mps")
-else:
-    device = torch.device("cpu")
-end_device = time.time()
-print(f"Device detection completed in: {end_device - start_device:.4f} seconds")
-print(f"Using device: {device}")
+    def __init__(self, collection_name: str = "NewsChunks"):
+        """
+        Инициализация RAG пайплайна
 
-# Подключение к Weaviate
-print("Connecting to Weaviate...")
-start_connection = time.time()
-client = weaviate.connect_to_local()
-assert client.is_ready(), "Weaviate is not ready"
-end_connection = time.time()
-print(f"Weaviate connection established in: {end_connection - start_connection:.2f} seconds")
+        Args:
+            collection_name: Имя коллекции в Weaviate
+        """
+        self.collection_name = collection_name
+        self.client = None
+        self.collection = None
 
-# Получение коллекции
-start_collection = time.time()
-COLL_NAME = "NewsChunks"
-collection = client.collections.use(COLL_NAME)
-end_collection = time.time()
-print(f"Collection access in: {end_collection - start_collection:.4f} seconds")
+    def connect(self):
+        """Подключение к Weaviate"""
+        logger.info("Connecting to Weaviate...")
+        self.client = weaviate.connect_to_local()
 
-# Выполнение поиска
-text = 'Погодные аномалии'
-print(f"\nExecuting search for: '{text}'...")
-start_search = time.time()
+        if not self.client.is_ready():
+            raise ConnectionError("Weaviate is not ready")
 
-search_results = search.hybrid_search_test(collection, query=text)
+        self.collection = self.client.collections.use(self.collection_name)
+        logger.info(f"Connected to collection: {self.collection_name}")
 
-end_search = time.time()
-print(f"Search completed in: {end_search - start_search:.2f} seconds")
+    def search(self, query: str, limit: int = 10, rerank_limit: int = 3, use_parent_docs: bool = True) -> List[Dict[str, Any]]:
+        """
+        Поиск релевантных документов с реренкингом
 
-print("\nSearch results:")
-print(search_results)
+        Args:
+            query: Поисковый запрос
+            limit: Количество результатов для первичного поиска
+            rerank_limit: Количество результатов после реренкинга
+            use_parent_docs: Использовать полные родительские документы вместо чанков
 
-# Закрытие соединения
-start_close = time.time()
-client.close()
-end_close = time.time()
-print(f"Connection closed in: {end_close - start_close:.4f} seconds")
+        Returns:
+            Список документов с метаданными
+        """
+        logger.info(f"Searching for: '{query}' (parent_docs: {use_parent_docs})")
+        start_time = time.time()
 
-# Общее время выполнения
-end_total = time.time()
-print(f"\n=== TIMING SUMMARY ===")
-print(f"Total execution time: {end_total - start_total:.2f} seconds")
-print(f"  - Module loading: {end_modules - start_modules:.2f}s ({((end_modules - start_modules)/(end_total - start_total)*100):.1f}%)")
-print(f"  - Device detection: {end_device - start_device:.4f}s")
-print(f"  - Weaviate connection: {end_connection - start_connection:.2f}s ({((end_connection - start_connection)/(end_total - start_total)*100):.1f}%)")
-print(f"  - Collection access: {end_collection - start_collection:.4f}s")
-print(f"  - Search execution: {end_search - start_search:.2f}s ({((end_search - start_search)/(end_total - start_total)*100):.1f}%)")
-print(f"  - Connection closing: {end_close - start_close:.4f}s")
+        results = search.hybrid_search_with_rerank(
+            self.collection,
+            query=query,
+            limit=limit,
+            rerank_limit=rerank_limit,
+            use_parent_docs=use_parent_docs
+        )
+
+        search_time = time.time() - start_time
+        doc_type = "parent documents" if use_parent_docs else "chunks"
+        logger.info(f"Search completed in {search_time:.2f}s, found {len(results)} {doc_type}")
+
+        return results
+
+    def generate_answer(self, query: str, context_docs: List[Dict[str, Any]], reasoning_level: str = "low") -> str:
+        """
+        Генерация ответа на основе найденных документов
+
+        Args:
+            query: Исходный вопрос пользователя
+            context_docs: Найденные документы
+            reasoning_level: Уровень рассуждений ('low', 'medium', 'high')
+
+        Returns:
+            Сгенерированный ответ
+        """
+        logger.info("Generating answer with LLM...")
+        start_time = time.time()
+
+        # Формируем контекст из документов
+        context_parts = []
+        for i, doc in enumerate(context_docs, 1):
+            context_parts.append(
+                f"Документ {i} (источник: {doc['source']}):\n{doc['text'][:500]}..."
+            )
+
+        context = "\n\n".join(context_parts)
+
+        # Формируем промпт
+        prompt = f"""На основе следующих документов ответь на вопрос пользователя.
+
+КОНТЕКСТ:
+{context}
+
+ВОПРОС: {query}
+
+ОТВЕТ (используй только информацию из контекста, если информации недостаточно - так и скажи):"""
+
+        # Генерируем ответ
+        answer = llm.generate_llm_response(prompt, reasoning_level=reasoning_level)
+
+        gen_time = time.time() - start_time
+        logger.info(f"Answer generated in {gen_time:.2f}s")
+
+        return answer
+
+    def query(self, user_query: str, search_limit: int = 10, rerank_limit: int = 3, reasoning_level: str = "low", use_parent_docs: bool = True) -> Dict[str, Any]:
+        """
+        Полный RAG пайплайн: поиск + генерация ответа
+
+        Args:
+            user_query: Вопрос пользователя
+            search_limit: Количество результатов для первичного поиска
+            rerank_limit: Количество результатов после реренкинга
+            reasoning_level: Уровень рассуждений LLM
+            use_parent_docs: Использовать полные родительские документы
+
+        Returns:
+            Dict с ответом и метаданными
+        """
+        logger.info(f"Processing query: '{user_query}' (parent_docs: {use_parent_docs})")
+        pipeline_start = time.time()
+
+        # Поиск
+        search_results = self.search(user_query, limit=search_limit, rerank_limit=rerank_limit, use_parent_docs=use_parent_docs)
+
+        # Генерация ответа
+        answer = self.generate_answer(user_query, search_results, reasoning_level=reasoning_level)
+
+        pipeline_time = time.time() - pipeline_start
+
+        result = {
+            'query': user_query,
+            'answer': answer,
+            'documents': search_results,
+            'metadata': {
+                'total_time': pipeline_time,
+                'num_documents': len(search_results),
+                'vectorizer': 'sergeyzh/BERTA',
+                'reranker': 'BAAI/bge-reranker-v2-m3',
+                'llm_model': 'openai/gpt-oss-20b:free',
+                'use_parent_docs': use_parent_docs
+            }
+        }
+
+        logger.info(f"Pipeline completed in {pipeline_time:.2f}s")
+        return result
+
+    def close(self):
+        """Закрытие соединения с Weaviate"""
+        if self.client:
+            self.client.close()
+            logger.info("Connection closed")
+
+
+# CLI интерфейс для тестирования
+if __name__ == "__main__":
+    # Инициализация пайплайна
+    rag = RAGPipeline()
+
+    try:
+        # Подключение
+        rag.connect()
+
+        # Тестовый запрос
+        test_query = "Стоимость акций Газпрома"
+
+        print(f"\n{'='*80}")
+        print(f"RAG PIPELINE TEST")
+        print(f"{'='*80}")
+        print(f"\nQuery: {test_query}\n")
+
+        # Выполнение запроса
+        result = rag.query(
+            user_query=test_query,
+            search_limit=10,
+            rerank_limit=3,
+            reasoning_level="low"
+        )
+
+        # Вывод результатов
+        print(f"\n{'='*80}")
+        print(f"ANSWER:")
+        print(f"{'='*80}")
+        print(result['answer'])
+
+        print(f"\n{'='*80}")
+        print(f"DOCUMENTS USED:")
+        print(f"{'='*80}")
+        for i, doc in enumerate(result['documents'], 1):
+            print(f"\n{i}. {doc['title']}")
+            print(f"   Rerank Score: {doc['rerank_score']:.4f}")
+            print(f"   Source: {doc['source']}")
+
+        print(f"\n{'='*80}")
+        print(f"METADATA:")
+        print(f"{'='*80}")
+        for key, value in result['metadata'].items():
+            print(f"   {key}: {value}")
+
+    finally:
+        rag.close()

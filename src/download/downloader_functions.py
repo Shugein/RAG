@@ -100,6 +100,7 @@ def prepare_weaviate_data(documents, chunk_size=500, chunk_overlap=100):
                     "timestamp": doc.metadata.get("time", ""),
                     "url": doc.metadata.get("url", ""),
                     "source": doc.metadata.get("source", ""),
+
                 }
             )
 

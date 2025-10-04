@@ -1,7 +1,59 @@
-
 services:
+  text2vec-transformers:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: berta-transformers
+    environment:
+      ENABLE_CUDA: "1"
+      NVIDIA_VISIBLE_DEVICES: "all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/meta"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks:
+      - weaviate-net
+
+  reranker-transformers:
+    image: semitechnologies/reranker-transformers:baai-bge-reranker-v2-m3
+    container_name: bge-reranker
+    environment:
+      ENABLE_CUDA: "1"
+      NVIDIA_VISIBLE_DEVICES: "all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/.well-known/ready')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks:
+      - weaviate-net
+
   weaviate:
     image: cr.weaviate.io/semitechnologies/weaviate:1.33.0
+    container_name: weaviate
     command:
       - --host
       - 0.0.0.0
@@ -12,37 +64,31 @@ services:
     ports:
       - "8080:8080"
       - "50051:50051"
-    restart: on-failure:0
+    restart: unless-stopped
     environment:
-      # QUERY_DEFAULTS_LIMIT: "20"
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"   # dev-режим
+      # QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
       PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
       CLUSTER_HOSTNAME: "node1"
-      # включаем модуль и задаём его URL
       DEFAULT_VECTORIZER_MODULE: "text2vec-transformers"
-      ENABLE_MODULES: "text2vec-transformers"
+      ENABLE_MODULES: "text2vec-transformers,reranker-transformers"
       TRANSFORMERS_INFERENCE_API: "http://text2vec-transformers:8080"
+      RERANKER_INFERENCE_API: "http://reranker-transformers:8080"
+      AUTOSCHEMA_ENABLED: "true"
+      LOG_LEVEL: "info"
     volumes:
-      - ./data:/var/lib/weaviate
+      - weaviate-data:/var/lib/weaviate
     depends_on:
-      - text2vec-transformers
+      text2vec-transformers:
+        condition: service_healthy
+      reranker-transformers:
+        condition: service_healthy
     networks:
       - weaviate-net
-
-  text2vec-transformers:
-    # готовый образ с моделями sentence-transformers
-    image: semitechnologies/transformers-inference:qwen-qwen3-embedding-0.6b
-    environment:
-      ENABLE_CUDA: "1"
-      NVIDIA_VISIBLE_DEVICES: "all"
-    # runtime: nvidia
-    ports:
-      - "8081:8080"
-    restart: unless-stopped
-    networks:
-      - weaviate-net
-
 
 networks:
   weaviate-net:
     driver: bridge
+
+volumes:
+  weaviate-data:
