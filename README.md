@@ -30,59 +30,20 @@ radar-ai/
 │   │       ├── sys_prompt.py       # System prompt для LLM
 │   │       └── output.py           # Рендеринг в HTML/PDF
 │   │
-├── news-aggregator/               # Основная система агрегации новостей
+├── parser/               # Основная система агрегации новостей
 │   ├── docker-compose.yml        # Docker конфигурация
 │   ├── .env.example              # Пример переменных окружения
 │   ├── requirements.txt          # Python зависимости
 │   ├── alembic.ini               # Конфигурация миграций
 │   ├── migrations/               # Миграции базы данных
 │   │   └── versions/
-│   ├── config/                   # Конфигурационные файлы
-│   │   ├── sources.yml           # Настройки источников
-│   │   └── ad_rules.yml          # Правила фильтрации рекламы
+│   ├── config/                   # Конфигурационные файлы       
 │   ├── src/
-│   │   ├── __init__.py
 │   │   ├── core/
-│   │   │   ├── __init__.py
-│   │   │   ├── config.py
-│   │   │   ├── database.py
-│   │   │   └── models.py
 │   ├── services/
-│   │   ├── __init__.py
-│   │   ├── telegram_parser/
-│   │   │   ├── __init__.py
-│   │   │   ├── client.py
-│   │   │   ├── parser.py
-│   │   │   └── antispam.py
 │   │   ├── enricher/
-│   │   │   ├── __init__.py
-│   │   │   ├── ner_extractor.py
-│   │   │   ├── moex_linker.py
-│   │   │   ├── topic_classifier.py
-│   │   │   ├── company_aliases.py
-│   │   │   ├── enrichment_service.py
-│   │   │   ├── moex_auto_search.py
-│   │   │   └── sector_mapper.py
 │   │   ├── html_parser/
-│   │   │   ├── __init__.py
-│   │   │   ├── base_html_parser.py
-│   │   │   ├── html_parser_service.py
-│   │   │   ├── forbes_parser.py
-│   │   │   ├── interfax_parser.py
-│   │   │   ├── moex_parser.py
-│   │   │   ├── edisclosure_parser.py
-│   │   │   └── edisclosure_messages_parser.py
 │   │   ├── events/
-│   │   │   ├── __init__.py
-│   │   │   ├── event_extractor.py
-│   │   │   ├── cmnln_engine.py
-│   │   │   ├── causal_chains_engine.py
-│   │   │   ├── ceg_realtime_service.py
-│   │   │   ├── enhanced_evidence_engine.py
-│   │   │   ├── event_prediction.py
-│   │   │   ├── historical_backfill_service.py
-│   │   │   ├── importance_calculator.py
-│   │   │   └── watchers.py
 │   │   ├── rag/
 │   │   │   ├── __init__.py
 │   │   │   ├── download/
@@ -106,21 +67,10 @@ radar-ai/
 │   │   │   ├── generator.py
 │   │   │   └── rag_pipeline.py
 │   │   ├── moex/
-│   │   │   ├── __init__.py
-│   │   │   └── moex_prices.py
 │   │   ├── ml/
-│   │   │   ├── news_clustering.py
-│   │   │   └── sentiment_analyzer.py
 │   │   ├── analytics/
-│   │   │   └── dashboard.py
 │   │   ├── outbox/
-│   │   │   ├── __init__.py
-│   │   │   ├── relay.py
-│   │   │   └── publisher.py
 │   │   ├── storage/
-│   │   │   ├── __init__.py
-│   │   │   ├── news_repository.py
-│   │   │   └── image_service.py
 │   │   ├── cache_service.py
 │   │   ├── covariance_service.py
 │   │   ├── event_bus.py
@@ -135,15 +85,6 @@ radar-ai/
 │   │   ├── schemas.py
 │   │   ├── websocket.py
 │   │   └── endpoints/
-│   │       ├── __init__.py
-│   │       ├── news.py
-│   │       ├── sources.py
-│   │       ├── health.py
-│   │       ├── jobs.py
-│   │       ├── ceg.py
-│   │       ├── importance.py
-│   │       ├── watchers.py
-│   │       └── images.py
 │   ├── middleware/
 │   │   └── rate_limiter.py
 │   ├── integrations/
@@ -155,14 +96,6 @@ radar-ai/
 │   │   ├── logging.py
 │   │   └── text_utils.py
 │   │   └── graph_models.py
-│   ├── tests/
-│   │   ├── fixtures/
-│   │   └── test_*.py
-│   ├── scripts/
-│   │   ├── start_telegram_parser.py
-│   │   ├── start_enricher.py
-│   │   ├── start_outbox_relay.py
-│   │   └── start_api.py
 │   ├── data/
 │   │   └── learned_aliases.json
 │   ├── models/
