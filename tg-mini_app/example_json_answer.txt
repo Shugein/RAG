@@ -1,0 +1,58 @@
+{
+    'query': 'Яндекс представил новую версию поискового алгоритма.', 
+    'answer': 'Да, согласно представленной информации, Яндекс действительно представил новую версию поискового алгоритма.', 
+    'documents': 
+    [
+        {'title': 'Яндекс обновил поиск', 
+            'source': 'TestAPI', 
+            'text': 'Яндекс представил новую версию поискового алгоритма. Улучшена работа с финансовыми запросами.', 
+            'chunk_text': 'Яндекс представил новую версию поискового алгоритма. Улучшена работа с финансовыми запросами.', 
+            'url': 'https://example.com/news/5', 
+            'timestamp': 1759598691, 
+            'hybrid_score': 0.6499999761581421, 
+            'rerank_score': 0.6499999761581421, 
+            'original_position': 1, 
+            'new_position': 1, 
+            'chunk_index': 0, 
+            'parent_doc_id': 'd86794cd-9f00-4d31-81f4-bcd11bdd0e1e', 
+            'text_type': 'parent_document'
+        }, 
+        {'title': 'Яндекс обновил поиск', 
+            'source': 'TestAPI', 
+            'text': 'Яндекс представил новую версию поискового алгоритма. Улучшена работа с финансовыми запросами.', 
+            'chunk_text': 'Яндекс представил новую версию поискового алгоритма. Улучшена работа с финансовыми запросами.', 
+            'url': 'https://example.com/news/5', 
+            'timestamp': 1759598602, 
+            'hybrid_score': 0.6499999761581421, 
+            'rerank_score': 0.6499999761581421, 
+            'original_position': 2, 
+            'new_position': 2, 
+            'chunk_index': 0, 
+            'parent_doc_id': '57085fb2-8299-4e58-955f-5c615419701e', 
+            'text_type': 'parent_document'
+        }, 
+        {'title': 'Яндекс обновил поиск', 
+            'source': 'TestAPI', 
+            'text': 'Яндекс представил новую версию поискового алгоритма. Улучшена работа с финансовыми запросами.', 
+            'chunk_text': 'Яндекс представил новую версию поискового алгоритма. Улучшена работа с финансовыми запросами.', 
+            'url': 'https://example.com/news/5', 
+            'timestamp': 1759594393, 
+            'hybrid_score': 0.6499999761581421, 
+            'rerank_score': 0.6499999761581421, 
+            'original_position': 3, 
+            'new_position': 3, 
+            'chunk_index': 0, 
+            'parent_doc_id': '1c582535-e295-4ecd-b791-d53ebc9e15bf', 
+            'text_type': 'parent_document'
+        }
+    ], 
+    'metadata': 
+    {
+        'total_time': 3.0958147048950195, 
+        'num_documents': 3, 
+        'vectorizer': 'sergeyzh/BERTA', 
+        'reranker': 'BAAI/bge-reranker-v2-m3', 
+        'llm_model': 'openai/gpt-oss-20b:free', 
+        'use_parent_docs': True
+    }
+}
