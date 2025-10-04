@@ -1,0 +1,70 @@
+{
+  "app": {
+    "name": "RADAR Finance Mini App",
+    "version": "1.0.0",
+    "description": "Telegram Mini App для системы финансовой аналитики RADAR",
+    "author": "Самый недообученный ML в Вавилоне ",
+    "license": "MIT"
+  },
+  "api": {
+    "base_url": "http://127.0.0.1:8000",
+    "prefix": "/api",
+    "version": "v1",
+    "timeout": 30000,
+    "retry_attempts": 3
+  },
+  "features": {
+    "hot_news": {
+      "enabled": true,
+      "default_limit": 20,
+      "max_limit": 100,
+      "cache_ttl": 300
+    },
+    "search": {
+      "enabled": true,
+      "min_query_length": 2,
+      "max_results": 50,
+      "highlight_matches": true
+    },
+    "statistics": {
+      "enabled": true,
+      "update_interval": 3600,
+      "show_charts": true
+    },
+    "e_disclosure": {
+      "enabled": true,
+      "show_messages": true,
+      "show_news": true,
+      "filter_by_company": true
+    }
+  },
+  "ui": {
+    "theme": {
+      "auto_detect": true,
+      "default": "light",
+      "support_dark": true
+    },
+    "navigation": {
+      "show_back_button": true,
+      "show_main_button": true,
+      "haptic_feedback": true
+    },
+    "animations": {
+      "enabled": true,
+      "duration": 250,
+      "easing": "ease-in-out"
+    }
+  },
+  "performance": {
+    "lazy_loading": true,
+    "image_optimization": true,
+    "cache_static_assets": true,
+    "preload_critical_data": true
+  },
+  "monitoring": {
+    "analytics_enabled": false,
+    "error_reporting": true,
+    "performance_tracking": true,
+    "user_behavior_tracking": false
+  }
+}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RADAR Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">🎯 RADAR Test Interface</h1>
+            
+            <form id="testForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Запрос:</label>
+                    <textarea 
+                        id="queryInput" 
+                        class="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Введите ваш запрос..."
+                    ></textarea>
+                </div>
+                
+                <button 
+                    type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                >
+                    🚀 Отправить запрос
+                </button>
+            </form>
+            
+            <div id="results" class="mt-8 hidden">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">📊 Результаты:</h2>
+                <div id="resultsContent" class="bg-gray-50 rounded-lg p-4"></div>
+            </div>
+            
+            <div id="loading" class="mt-8 hidden text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-gray-600">Обработка запроса...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return;
+            
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            // Показываем загрузку
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/process_query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        type: 'search',
+                        sector: 'all'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                // Отображаем результаты
+                if (result.documents && result.answer) {
+                    // Реальный RADAR ответ
+                    resultsContent.innerHTML = generateRadarHTML(result);
+                } else {
+                    // Любой другой формат
+                    resultsContent.innerHTML = `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(result, null, 2)}</pre>`;
+                }
+                
+                results.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                resultsContent.innerHTML = `<div class="text-red-600 p-4 bg-red-50 rounded-lg">❌ Ошибка: ${error.message}</div>`;
+                results.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        });
+        
+        function generateRadarHTML(result) {
+            const { query, answer, documents, metadata } = result;
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Ответ -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h3 class="font-bold text-green-900 mb-2">🤖 Ответ RADAR:</h3>
+                        <p class="text-green-800">${answer}</p>
+                    </div>
+                    
+                    <!-- Метаданные -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-bold text-blue-900 mb-2">📊 Статистика:</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>Документов: <span class="font-medium">${metadata.num_documents || 0}</span></div>
+                            <div>Время: <span class="font-medium">${(metadata.total_time || 0).toFixed(2)}с</span></div>
+                            <div>Векторизатор: <span class="font-medium">${metadata.vectorizer || 'N/A'}</span></div>
+                            <div>LLM: <span class="font-medium">${metadata.llm_model || 'N/A'}</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Документы -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-gray-900">📄 Найденные документы:</h3>
+                        ${documents.map((doc, i) => `
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">${doc.title}</h4>
+                                <p class="text-gray-700 mb-2">${doc.text || doc.chunk_text}</p>
+                                <div class="text-sm text-gray-500 flex justify-between">
+                                    <span>📰 ${doc.source}</span>
+                                    <span>📈 Скор: ${(doc.rerank_score || 0).toFixed(3)}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
