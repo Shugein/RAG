@@ -15,7 +15,7 @@ services:
               count: 1
               capabilities: [gpu]
     ports:
-      - "8081:8080"
+      - "8083:8080"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/meta"]

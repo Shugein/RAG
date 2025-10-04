@@ -114,7 +114,7 @@ class CachedFinanceNERExtractor:
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-5-nano-2025-08-07",  # Изменен дефолт на GPT-4o-mini для OpenAI
+        model: str = "gpt-5-nano-2025-08-07", 
         enable_caching: bool = True
     ):
         self.api_key = api_key

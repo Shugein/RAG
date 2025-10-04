@@ -58,122 +58,112 @@
 #     return rearranged_docs, rearranged_docs_topn
 
 import weaviate.classes as wvc
-from weaviate.classes.query import HybridFusion, Rerank
+from weaviate.classes.query import HybridFusion, Rerank, Filter
 
-def hybrid_search_with_rerank(collection, query, limit=10, rerank_limit=3, use_parent_docs=True):
+def hybrid_search_with_rerank(
+    collection,
+    query,
+    limit=10,
+    rerank_limit=3,
+    use_parent_docs=True,
+    hotness_weight=0.3,
+    alpha=0.6
+):
     """
     Гибридный поиск с реренкингом используя BAAI/bge-reranker-v2-m3
+
+    Hotness добавляется к финальному скору как взвешенная компонента.
 
     :param collection: Weaviate коллекция
     :param query: Поисковый запрос
     :param limit: Количество результатов для первичного поиска
     :param rerank_limit: Количество топ результатов после реренкинга
     :param use_parent_docs: Использовать полные родительские документы вместо чанков
+    :param hotness_weight: Вес hotness в финальном скоре (0.0-1.0). Финальный скор = rerank_score * (1 - weight) + hotness * weight
+    :param alpha: Баланс между векторным (alpha) и BM25 (1-alpha) поиском
+                  0.0 = только BM25 (лексический)
+                  0.5 = равный вес (по умолчанию)
+                  1.0 = только векторный (семантический)
     :return: Список результатов после реренкинга (с родительскими документами если use_parent_docs=True)
     """
     try:
-        # STEP 1: Обычный гибридный поиск БЕЗ реренкинга
+        # ЕДИНЫЙ гибридный поиск С реренкингом
         print(f"\n{'='*80}")
-        print(f"=== STEP 1: Hybrid Search (WITHOUT reranking) ===")
+        print(f"=== HYBRID SEARCH WITH RERANKING ===")
+        print(f"=== Alpha (vector/BM25 balance): {alpha} | Hotness weight: {hotness_weight} ===")
         print(f"{'='*80}")
-        results_before = collection.query.hybrid(
+
+        results = collection.query.hybrid(
             query=query,
-            alpha=0.35,
-            query_properties=["text_for_bm25", 'title'],
-            fusion_type=HybridFusion.RELATIVE_SCORE,
-            return_metadata=wvc.query.MetadataQuery(score=True),
-            limit=limit
-        )
-
-        print(f"\nFound {len(results_before.objects)} results")
-
-        # Сохраняем результаты ДО реренкинга
-        before_ranking = []
-        original_scores = {}
-        for i, obj in enumerate(results_before.objects):
-            doc_id = str(obj.uuid)
-            score = obj.metadata.score
-            title = obj.properties.get('title', 'N/A')
-
-            original_scores[doc_id] = {
-                'score': score,
-                'position': i + 1,
-                'title': title,
-                'text': obj.properties.get('original_text', '')
-            }
-            before_ranking.append({
-                'uuid': doc_id,
-                'title': title,
-                'score': score,
-                'position': i + 1
-            })
-
-            print(f"{i+1:2d}. Score: {score:.6f} | {title[:70]}")
-
-        # STEP 2: Гибридный поиск С реренкингом
-        print(f"\n{'='*80}")
-        print(f"=== STEP 2: Hybrid Search WITH Reranking ===")
-        print(f"{'='*80}")
-        results_after = collection.query.hybrid(
-            query=query,
-            alpha=0.35,
-            query_properties=["text_for_bm25", 'title'],
+            alpha=alpha,  # Баланс между векторным и BM25
+            query_properties=["original_text", "text_for_bm25"],  # original_text для векторного, text_for_bm25 для BM25
             fusion_type=HybridFusion.RELATIVE_SCORE,
             return_metadata=wvc.query.MetadataQuery(score=True),
             limit=limit,
             rerank=Rerank(
-                prop="original_text",
+                prop="original_text",  # Реранкер использует оригинальный текст
                 query=query
             )
         )
 
-        print(f"\nFound {len(results_after.objects)} results after reranking")
+        print(f"\nFound {len(results.objects)} results after hybrid search + reranking")
 
-        # Анализируем результаты ПОСЛЕ реренкинга
-        after_ranking = []
-        for i, obj in enumerate(results_after.objects):
+        # Анализируем результаты и добавляем hotness к скору
+        ranking = []
+        for i, obj in enumerate(results.objects):
             doc_id = str(obj.uuid)
             rerank_score = obj.metadata.score
+            hotness = obj.properties.get('hotness', 0.5)
             title = obj.properties.get('title', 'N/A')
 
-            original_data = original_scores.get(doc_id, {})
-            original_score = original_data.get('score', 0.0)
-            original_position = original_data.get('position', '?')
+            # Вычисляем финальный скор с учетом hotness
+            final_score = rerank_score * (1 - hotness_weight) + hotness * hotness_weight
 
-            position_change = original_position - (i + 1) if isinstance(original_position, int) else 0
-            position_indicator = "🔺" if position_change > 0 else "🔻" if position_change < 0 else "➡️"
-
-            after_ranking.append({
+            ranking.append({
                 'uuid': doc_id,
                 'title': title,
-                'original_score': original_score,
                 'rerank_score': rerank_score,
-                'original_position': original_position,
-                'new_position': i + 1,
-                'position_change': position_change
+                'hotness': hotness,
+                'final_score': final_score,
+                'rerank_position': i + 1
             })
 
-            print(f"{i+1:2d}. {position_indicator} (was #{original_position}) | Hybrid: {original_score:.6f} → Rerank: {rerank_score:.6f} | {title[:50]}")
+        # ПЕРЕСОРТИРОВКА по финальному скору (rerank_score + hotness)
+        ranking.sort(key=lambda x: x['final_score'], reverse=True)
+
+        # Обновляем позиции после пересортировки
+        for i, item in enumerate(ranking):
+            item['final_position'] = i + 1
+
+        print(f"\nAfter hotness adjustment:")
+        for item in ranking:
+            print(f"{item['final_position']:2d}. Rerank: {item['rerank_score']:.6f} + Hotness: {item['hotness']:.2f} = Final: {item['final_score']:.6f} | {item['title'][:50]}")
 
         # Формируем финальные результаты с дедупликацией родительских документов
         print(f"\n{'='*80}")
         if use_parent_docs:
-            print(f"=== STEP 3: Parent Document Retrieval with Deduplication ===")
+            print(f"=== Final Documents (sorted by final score with hotness) ===")
         else:
-            print(f"=== DETAILED TOP {rerank_limit} RESULTS ===")
+            print(f"=== Final Chunks (TOP {rerank_limit}) ===")
         print(f"{'='*80}")
 
-        reranked_results = []
+        final_results = []
         seen_parent_docs = set()  # Для отслеживания уникальных родительских документов
 
-        # Итерируемся по всем результатам после реренкинга
-        for i, obj in enumerate(results_after.objects):
+        # Создаем мапу для быстрого доступа к объектам по UUID
+        objects_map = {str(obj.uuid): obj for obj in results.objects}
+
+        # Итерируемся по отсортированному списку (по final_score)
+        for rank_item in ranking:
             # Прекращаем если набрали нужное количество уникальных документов
-            if len(reranked_results) >= rerank_limit:
+            if len(final_results) >= rerank_limit:
                 break
 
-            doc_id = str(obj.uuid)
-            original_data = original_scores.get(doc_id, {})
+            doc_id = rank_item['uuid']
+            obj = objects_map.get(doc_id)
+            if not obj:
+                continue
+
             parent_doc_id = obj.properties.get('parent_doc_id', doc_id)
 
             # Если используем родительские документы и этот parent уже был - пропускаем
@@ -197,31 +187,38 @@ def hybrid_search_with_rerank(collection, query, limit=10, rerank_limit=3, use_p
                 'title': obj.properties.get('title', 'N/A'),
                 'source': obj.properties.get('source', 'N/A'),
                 'text': text_to_use,
-                'chunk_text': obj.properties.get('original_text', ''),  # Сохраняем оригинальный чанк для справки
+                'chunk_text': obj.properties.get('original_text', ''),
                 'url': obj.properties.get('url', 'N/A'),
                 'timestamp': obj.properties.get('timestamp', 0),
-                'hybrid_score': original_data.get('score', 0.0),
-                'rerank_score': obj.metadata.score,
-                'original_position': original_data.get('position', '?'),
-                'new_position': i + 1,
+                'rerank_score': rank_item['rerank_score'],
+                'hotness': rank_item['hotness'],
+                'final_score': rank_item['final_score'],
+                'final_position': rank_item['final_position'],
                 'chunk_index': obj.properties.get('chunk_index', 0),
                 'parent_doc_id': parent_doc_id,
-                'text_type': text_type
+                'text_type': text_type,
+                # Добавляем извлеченные сущности из метаданных
+                'companies': obj.properties.get('companies', []),
+                'company_tickers': obj.properties.get('company_tickers', []),
+                'company_sectors': obj.properties.get('company_sectors', []),
+                'people': obj.properties.get('people', []),
+                'people_positions': obj.properties.get('people_positions', []),
+                'markets': obj.properties.get('markets', []),
+                'market_types': obj.properties.get('market_types', []),
+                'financial_metric_types': obj.properties.get('financial_metric_types', []),
+                'financial_metric_values': obj.properties.get('financial_metric_values', []),
+                'entities_json': obj.properties.get('entities_json', ''),
             }
-            reranked_results.append(result)
+            final_results.append(result)
 
-            position_change = result['original_position'] - result['new_position'] if isinstance(result['original_position'], int) else 0
-            score_change = result['rerank_score'] - result['hybrid_score']
-
-            print(f"\n📄 Result #{len(reranked_results)}")
+            print(f"\n📄 Result #{len(final_results)}")
             print(f"   Title: {result['title']}")
             print(f"   Type: {'🔹 Full Parent Document' if use_parent_docs else '📄 Chunk'}")
             if use_parent_docs:
                 print(f"   Retrieved from chunk #{result['chunk_index']}")
-            print(f"   Position: #{result['original_position']} → #{result['new_position']} (Δ {position_change:+d} places)")
-            print(f"   Hybrid Score:  {result['hybrid_score']:.6f}")
             print(f"   Rerank Score:  {result['rerank_score']:.6f}")
-            print(f"   Score Change:  {score_change:+.6f}")
+            print(f"   Hotness:       {result['hotness']:.2f}")
+            print(f"   Final Score:   {result['final_score']:.6f} = {result['rerank_score']:.4f} × {(1-hotness_weight):.2f} + {result['hotness']:.2f} × {hotness_weight:.2f}")
             print(f"   Source: {result['source']}")
             if use_parent_docs:
                 print(f"   Chunk preview: {result['chunk_text'][:120]}...")
@@ -229,11 +226,9 @@ def hybrid_search_with_rerank(collection, query, limit=10, rerank_limit=3, use_p
             else:
                 print(f"   Text: {result['text'][:120]}...")
 
-        print(f"\n✅ Final results: {len(reranked_results)} unique {'parent documents' if use_parent_docs else 'chunks'}")
-        if use_parent_docs and len(seen_parent_docs) < len(results_after.objects[:rerank_limit]):
-            print(f"   ℹ️  Skipped {len(results_after.objects[:rerank_limit]) - len(seen_parent_docs)} duplicate parent documents")
+        print(f"\n✅ Final results: {len(final_results)} unique {'parent documents' if use_parent_docs else 'chunks'}")
 
-        return reranked_results
+        return final_results
 
     except Exception as e:
         print(f"Search with rerank failed: {e}")

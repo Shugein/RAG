@@ -1,13 +1,24 @@
 """
 RAG Pipeline Engine
-Основной модуль для поиска и генерации ответов
+Основной модуль для поиска и генерации ответов с интеграцией LLM_final
 """
 import logging
 import time
-from typing import List, Dict, Any
+import json
+from typing import List, Dict, Any, Optional
+from datetime import datetime
 import weaviate
 
-from src.system import search, llm
+from src.system import search
+from src.system.LLM_final.main import (
+    generate_news_draft,
+    DraftRequest,
+    SourceItem,
+    Instrument,
+    Forecast,
+    DraftResponse
+)
+from src.system.entity_recognition import ExtractedEntities
 
 # Настройка логирования
 logging.basicConfig(
@@ -42,7 +53,15 @@ class RAGPipeline:
         self.collection = self.client.collections.use(self.collection_name)
         logger.info(f"Connected to collection: {self.collection_name}")
 
-    def search(self, query: str, limit: int = 10, rerank_limit: int = 3, use_parent_docs: bool = True) -> List[Dict[str, Any]]:
+    def search(
+        self,
+        query: str,
+        limit: int = 10,
+        rerank_limit: int = 3,
+        use_parent_docs: bool = True,
+        hotness_weight: float = 0.3,
+        alpha: float = 0.5
+    ) -> List[Dict[str, Any]]:
         """
         Поиск релевантных документов с реренкингом
 
@@ -51,11 +70,13 @@ class RAGPipeline:
             limit: Количество результатов для первичного поиска
             rerank_limit: Количество результатов после реренкинга
             use_parent_docs: Использовать полные родительские документы вместо чанков
+            hotness_weight: Вес hotness в финальном скоре (0.0-1.0)
+            alpha: Баланс между векторным и BM25 поиском (0.0-1.0)
 
         Returns:
             Список документов с метаданными
         """
-        logger.info(f"Searching for: '{query}' (parent_docs: {use_parent_docs})")
+        logger.info(f"Searching for: '{query}' (parent_docs: {use_parent_docs}, alpha: {alpha})")
         start_time = time.time()
 
         results = search.hybrid_search_with_rerank(
@@ -63,7 +84,9 @@ class RAGPipeline:
             query=query,
             limit=limit,
             rerank_limit=rerank_limit,
-            use_parent_docs=use_parent_docs
+            use_parent_docs=use_parent_docs,
+            hotness_weight=hotness_weight,
+            alpha=alpha
         )
 
         search_time = time.time() - start_time
@@ -72,84 +95,182 @@ class RAGPipeline:
 
         return results
 
-    def generate_answer(self, query: str, context_docs: List[Dict[str, Any]], reasoning_level: str = "low") -> str:
+    def generate_article(
+        self,
+        query: str,
+        context_docs: List[Dict[str, Any]],
+        news_type: str = "industry_trend",
+        tone: str = "explanatory",
+        desired_outputs: List[str] = None
+    ) -> DraftResponse:
         """
-        Генерация ответа на основе найденных документов
+        Генерация статьи на основе найденных документов через LLM_final
 
         Args:
-            query: Исходный вопрос пользователя
-            context_docs: Найденные документы
-            reasoning_level: Уровень рассуждений ('low', 'medium', 'high')
+            query: Исходный вопрос/тема пользователя
+            context_docs: Найденные документы с метаданными и сущностями
+            news_type: Тип новости (earnings, guidance, macro, industry_trend, etc.)
+            tone: Тональность (neutral, explanatory, urgent, etc.)
+            desired_outputs: Форматы вывода (social_post, article_draft, alert, etc.)
 
         Returns:
-            Сгенерированный ответ
+            DraftResponse с готовыми текстами
         """
-        logger.info("Generating answer with LLM...")
+        logger.info("Generating article with LLM_final...")
         start_time = time.time()
 
-        # Формируем контекст из документов
-        context_parts = []
-        for i, doc in enumerate(context_docs, 1):
-            context_parts.append(
-                f"Документ {i} (источник: {doc['source']}):\n{doc['text'][:500]}..."
-            )
+        if desired_outputs is None:
+            desired_outputs = ["social_post", "article_draft"]
 
-        context = "\n\n".join(context_parts)
+        # Формируем данные из документов
+        summary_parts = []
+        sources = []
+        all_text = []
+        instruments = []
+        all_companies = set()
+        all_tickers = set()
 
-        # Формируем промпт
-        prompt = f"""На основе следующих документов ответь на вопрос пользователя.
+        for doc in context_docs:
+            # Собираем весь текст для body_text
+            all_text.append(doc.get('text', ''))
 
-КОНТЕКСТ:
-{context}
+            # Собираем источники
+            if doc.get('url'):
+                sources.append(SourceItem(
+                    title=doc.get('title', 'Источник'),
+                    url=doc['url']
+                ))
 
-ВОПРОС: {query}
+            # Краткая выжимка для summary
+            summary_parts.append(f"{doc.get('title', '')}: {doc.get('text', '')[:200]}")
 
-ОТВЕТ (используй только информацию из контекста, если информации недостаточно - так и скажи):"""
+        # Обрабатываем сущности из ПЕРВОГО документа (самого релевантного)
+        if context_docs:
+            first_doc = context_docs[0]
 
-        # Генерируем ответ
-        answer = llm.generate_llm_response(prompt, reasoning_level=reasoning_level)
+            # Извлекаем компании и тикеры из метаданных
+            companies = first_doc.get('companies', [])
+            company_tickers = first_doc.get('company_tickers', [])
+            company_sectors = first_doc.get('company_sectors', [])
+
+            # Формируем инструменты
+            for i, company in enumerate(companies):
+                ticker = company_tickers[i] if i < len(company_tickers) else None
+                sector = company_sectors[i] if i < len(company_sectors) else None
+
+                if ticker:
+                    instruments.append(Instrument(
+                        ticker=ticker,
+                        name=company,
+                        class_="equity",
+                        exchange="MOEX",  # По умолчанию MOEX для российских компаний
+                        currency="RUB",
+                        country="RU"
+                    ))
+
+        # Формируем headline из query
+        headline = query if len(query) < 100 else query[:97] + "..."
+
+        # Формируем summary из первых документов
+        summary = " | ".join(summary_parts[:2])
+        if len(summary) > 300:
+            summary = summary[:297] + "..."
+
+        # Полный текст для body_text
+        body_text = "\n\n".join(all_text)
+
+        # Получаем hotness из первого документа
+        hot_score = context_docs[0].get('hotness', 0.5) if context_docs else 0.5
+
+        # Формируем запрос для LLM
+        draft_request = DraftRequest(
+            news_type=news_type,
+            language="ru",
+            audience="mixed",
+            tone=tone,
+            headline=headline,
+            summary=summary,
+            body_text=body_text,
+            sources=sources,
+            instruments=instruments,
+            model_forecasts={},  # Можно добавить прогнозы если есть
+            desired_outputs=desired_outputs,
+            include_hashtags=True,
+            include_disclaimer=True,
+            include_visual_ideas=True,
+            max_words_social=280,
+            max_words_article=500,
+            hot_score=hot_score
+        )
+
+        # Генерируем черновик
+        draft = generate_news_draft(draft_request)
 
         gen_time = time.time() - start_time
-        logger.info(f"Answer generated in {gen_time:.2f}s")
+        logger.info(f"Article generated in {gen_time:.2f}s")
 
-        return answer
+        return draft
 
-    def query(self, user_query: str, search_limit: int = 10, rerank_limit: int = 3, reasoning_level: str = "low", use_parent_docs: bool = True) -> Dict[str, Any]:
+    def query(
+        self,
+        user_query: str,
+        search_limit: int = 10,
+        rerank_limit: int = 3,
+        use_parent_docs: bool = True,
+        news_type: str = "industry_trend",
+        tone: str = "explanatory",
+        desired_outputs: List[str] = None
+    ) -> Dict[str, Any]:
         """
-        Полный RAG пайплайн: поиск + генерация ответа
+        Полный RAG пайплайн: поиск + генерация статьи
 
         Args:
-            user_query: Вопрос пользователя
+            user_query: Вопрос/тема пользователя
             search_limit: Количество результатов для первичного поиска
             rerank_limit: Количество результатов после реренкинга
-            reasoning_level: Уровень рассуждений LLM
             use_parent_docs: Использовать полные родительские документы
+            news_type: Тип новости для генерации
+            tone: Тональность статьи
+            desired_outputs: Форматы вывода
 
         Returns:
-            Dict с ответом и метаданными
+            Dict с статьей и метаданными
         """
         logger.info(f"Processing query: '{user_query}' (parent_docs: {use_parent_docs})")
         pipeline_start = time.time()
 
         # Поиск
-        search_results = self.search(user_query, limit=search_limit, rerank_limit=rerank_limit, use_parent_docs=use_parent_docs)
+        search_results = self.search(
+            user_query,
+            limit=search_limit,
+            rerank_limit=rerank_limit,
+            use_parent_docs=use_parent_docs
+        )
 
-        # Генерация ответа
-        answer = self.generate_answer(user_query, search_results, reasoning_level=reasoning_level)
+        # Генерация статьи
+        draft = self.generate_article(
+            user_query,
+            search_results,
+            news_type=news_type,
+            tone=tone,
+            desired_outputs=desired_outputs
+        )
 
         pipeline_time = time.time() - pipeline_start
 
         result = {
             'query': user_query,
-            'answer': answer,
+            'draft': draft,  # DraftResponse объект
             'documents': search_results,
             'metadata': {
                 'total_time': pipeline_time,
                 'num_documents': len(search_results),
-                'vectorizer': 'sergeyzh/BERTA',
+                'vectorizer': 'text2vec-transformers (GPU)',
                 'reranker': 'BAAI/bge-reranker-v2-m3',
-                'llm_model': 'openai/gpt-oss-20b:free',
-                'use_parent_docs': use_parent_docs
+                'llm_model': 'gpt-5',
+                'use_parent_docs': use_parent_docs,
+                'news_type': news_type,
+                'tone': tone
             }
         }
 
@@ -173,10 +294,10 @@ if __name__ == "__main__":
         rag.connect()
 
         # Тестовый запрос
-        test_query = "Стоимость акций Газпрома"
+        test_query = "Что известно о Сбербанке?"
 
         print(f"\n{'='*80}")
-        print(f"RAG PIPELINE TEST")
+        print(f"RAG PIPELINE TEST - ARTICLE GENERATION")
         print(f"{'='*80}")
         print(f"\nQuery: {test_query}\n")
 
@@ -185,22 +306,43 @@ if __name__ == "__main__":
             user_query=test_query,
             search_limit=10,
             rerank_limit=3,
-            reasoning_level="low"
+            use_parent_docs=True,
+            news_type="industry_trend",
+            tone="explanatory",
+            desired_outputs=["social_post", "article_draft", "alert"]
         )
 
         # Вывод результатов
+        draft = result['draft']
+
         print(f"\n{'='*80}")
-        print(f"ANSWER:")
+        print(f"GENERATED ARTICLE:")
         print(f"{'='*80}")
-        print(result['answer'])
+        print(f"\nЗаголовок: {draft.headline}")
+        print(f"Подзаголовок: {draft.dek}\n")
+
+        print("Ключевые моменты:")
+        for point in draft.key_points:
+            print(f"  • {point}")
+
+        print(f"\n--- Варианты текста ---")
+        for variant_name, variant_text in draft.variants.items():
+            print(f"\n[{variant_name.upper()}]:")
+            print(variant_text[:300] + "..." if len(variant_text) > 300 else variant_text)
+
+        if draft.hashtags:
+            print(f"\nХэштеги: {' '.join(draft.hashtags)}")
 
         print(f"\n{'='*80}")
         print(f"DOCUMENTS USED:")
         print(f"{'='*80}")
         for i, doc in enumerate(result['documents'], 1):
             print(f"\n{i}. {doc['title']}")
-            print(f"   Rerank Score: {doc['rerank_score']:.4f}")
+            print(f"   Final Score: {doc['final_score']:.4f}")
+            print(f"   Hotness: {doc['hotness']:.2f}")
             print(f"   Source: {doc['source']}")
+            if doc.get('companies'):
+                print(f"   Компании: {', '.join(doc['companies'])}")
 
         print(f"\n{'='*80}")
         print(f"METADATA:")
