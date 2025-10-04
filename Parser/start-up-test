@@ -1,0 +1,6 @@
+.venv\Scripts\Activate.ps1
+
+docker-compose -f docker/docker-compose.yml up -d postgres
+docker build -f docker/Dockerfile.base -t news-aggregator-base:latest 
+
+docker-compose up -d postgres rabbitmq redis

@@ -1,0 +1,3 @@
+FROM news-aggregator-base:latest
+
+CMD ["python", "scripts/start_telegram_parser.py"]

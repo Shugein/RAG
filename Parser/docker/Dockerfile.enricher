@@ -1,0 +1,6 @@
+FROM news-aggregator-base:latest
+
+# Download Natasha models
+RUN python -c "from natasha import NewsEmbedding, NewsNERTagger; NewsEmbedding(); NewsNERTagger(NewsEmbedding())"
+
+CMD ["python", "scripts/start_enricher.py"]
