@@ -30,7 +30,7 @@ radar-ai/
 │   │       ├── sys_prompt.py       # System prompt для LLM
 │   │       └── output.py           # Рендеринг в HTML/PDF
 │   │
-├── paser/               # Основная система агрегации новостей
+├── news-aggregator/               # Основная система агрегации новостей
 │   ├── docker-compose.yml        # Docker конфигурация
 │   ├── .env.example              # Пример переменных окружения
 │   ├── requirements.txt          # Python зависимости
@@ -83,6 +83,28 @@ radar-ai/
 │   │   │   ├── historical_backfill_service.py
 │   │   │   ├── importance_calculator.py
 │   │   │   └── watchers.py
+│   │   ├── rag/
+│   │   │   ├── __init__.py
+│   │   │   ├── download/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── downloader_functions.py
+│   │   │   │   └── check_collection.py
+│   │   │   ├── system/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── vdb.py
+│   │   │   │   ├── entity_recognition.py
+│   │   │   │   ├── search.py
+│   │   │   │   ├── engine.py
+│   │   │   │   └── llm_final/
+│   │   │   │       ├── __init__.py
+│   │   │   │       ├── main.py
+│   │   │   │       ├── sys_prompt.py
+│   │   │   │       └── output.py
+│   │   │   ├── vector_store.py
+│   │   │   ├── embeddings.py
+│   │   │   ├── retriever.py
+│   │   │   ├── generator.py
+│   │   │   └── rag_pipeline.py
 │   │   ├── moex/
 │   │   │   ├── __init__.py
 │   │   │   └── moex_prices.py
@@ -132,27 +154,185 @@ radar-ai/
 │   │   ├── __init__.py
 │   │   ├── logging.py
 │   │   └── text_utils.py
-│   └── graph_models.py
-├── tests/
-│   ├── fixtures/
-│   └── test_*.py
-└── scripts/
-    ├── start_telegram_parser.py
-    ├── start_enricher.py
-    ├── start_outbox_relay.py
-    └── start_api.py
+│   │   └── graph_models.py
+│   ├── tests/
+│   │   ├── fixtures/
+│   │   └── test_*.py
+│   ├── scripts/
+│   │   ├── start_telegram_parser.py
+│   │   ├── start_enricher.py
+│   │   ├── start_outbox_relay.py
+│   │   └── start_api.py
+│   ├── data/
+│   │   └── learned_aliases.json
+│   ├── models/
+│   ├── sessions/
+│   └── docker/
+│       ├── Dockerfile.api
+│       ├── Dockerfile.telegram
+│       ├── Dockerfile.enricher
+│       └── Dockerfile.outbox
 ```
 
-## 🚀 Быстрый старт
+### Core модули
+- **config.py** - управление конфигурацией через Pydantic Settings
+- **database.py** - SQLAlchemy engine и сессии
+- **models.py** - ORM модели для всех таблиц
+
+### Telegram Parser Service
+- **client.py** - инициализация Telethon клиента
+- **parser.py** - основная логика парсинга сообщений
+- **antispam.py** - многоуровневая фильтрация рекламы
+
+### HTML Parser Service
+- **base_html_parser.py** - базовый класс для всех HTML парсеров
+- **html_parser_service.py** - сервис управления парсерами
+- **forbes_parser.py** - парсер Forbes Russia
+- **interfax_parser.py** - парсер Interfax
+- **moex_parser.py** - парсер Московской биржи
+- **edisclosure_parser.py** - парсер eDisclosure
+- **edisclosure_messages_parser.py** - парсер сообщений eDisclosure
+
+### Enricher Service
+- **ner_extractor.py** - извлечение сущностей через Natasha
+- **moex_linker.py** - связывание компаний с тикерами через Algopack API
+- **topic_classifier.py** - классификация по отраслям
+- **company_aliases.py** - управление алиасами компаний
+- **enrichment_service.py** - основной сервис обогащения
+- **moex_auto_search.py** - автоматический поиск по MOEX
+- **sector_mapper.py** - маппинг отраслей
+
+### Events & CEG Engine
+- **event_extractor.py** - извлечение событий из новостей
+- **cmnln_engine.py** - движок CMNLN (Causal Mining of News & Links Networks)
+- **causal_chains_engine.py** - построение причинных цепочек
+- **ceg_realtime_service.py** - real-time обработка CEG
+- **enhanced_evidence_engine.py** - поиск доказательств причинности
+- **event_prediction.py** - предсказание событий
+- **historical_backfill_service.py** - историческая обработка
+- **importance_calculator.py** - расчет важности событий
+- **watchers.py** - мониторинг событий
+
+### RAG (Retrieval-Augmented Generation) System
+- **download/downloader_functions.py** - загрузка и подготовка данных с NER
+- **download/check_collection.py** - проверка коллекций Weaviate
+- **system/vdb.py** - создание векторной БД и загрузка данных
+- **system/entity_recognition.py** - извлечение финансовых сущностей (GPT-5-nano)
+- **system/search.py** - гибридный поиск с реранкингом
+- **system/engine.py** - RAG пайплайн (поиск + генерация)
+- **system/llm_final/main.py** - основной модуль генерации статей
+- **system/llm_final/sys_prompt.py** - System prompt для LLM
+- **system/llm_final/output.py** - рендеринг в HTML/PDF
+- **vector_store.py** - управление векторным хранилищем
+- **embeddings.py** - создание и управление эмбеддингами
+- **retriever.py** - поиск релевантных документов
+- **generator.py** - генерация ответов на основе найденных документов
+- **rag_pipeline.py** - основной RAG пайплайн
+
+### RAG Core Components (в корне src/)
+- **download/** - модули загрузки и приема данных
+- **system/** - ядро RAG системы
+- **system/LLM_final/** - генерация статей
+
+### Market Data & Analytics
+- **moex_prices.py** - получение данных с MOEX
+- **market_data_service.py** - сервис рыночных данных
+- **trading_signals.py** - торговые сигналы
+- **impact_calculator.py** - расчет влияния на рынки
+- **covariance_service.py** - анализ ковариации
+- **analytics/dashboard.py** - аналитическая панель
+
+### Machine Learning
+- **news_clustering.py** - кластеризация новостей
+- **sentiment_analyzer.py** - анализ тональности
+
+### API Layer
+- **main.py** - главный файл FastAPI приложения
+- **historical.py** - исторические данные
+- **schemas.py** - Pydantic схемы для API
+- **websocket.py** - WebSocket соединения
+- **endpoints/** - REST API endpoints:
+  - **news.py** - управление новостями
+  - **sources.py** - управление источниками
+  - **health.py** - проверка здоровья системы
+  - **jobs.py** - управление задачами
+  - **ceg.py** - Causal Event Graph API
+  - **importance.py** - API важности событий
+  - **watchers.py** - API мониторинга
+  - **images.py** - управление изображениями
+
+### Infrastructure
+- **outbox/relay.py** - чтение из outbox таблицы
+- **outbox/publisher.py** - публикация в RabbitMQ
+- **storage/news_repository.py** - CRUD операции с новостями
+- **storage/image_service.py** - сохранение и дедупликация изображений
+- **cache_service.py** - сервис кэширования
+- **event_bus.py** - шина событий
+- **news_trigger.py** - триггеры новостей
+- **workers/impact_worker.py** - воркер расчета влияния
+- **middleware/rate_limiter.py** - ограничение скорости запросов
+
+### Graph Database
+- **graph_models.py** - модели для Neo4j графа
+
+### Utilities
+- **logging.py** - настройка логирования
+- **text_utils.py** - утилиты для работы с текстом
+
+## Технологический стек
+
+### Backend Framework
+- **Python 3.11+** - основной язык программирования
+- **FastAPI** - современный веб-фреймворк для API
+- **Pydantic** - валидация данных и настройки
+- **SQLAlchemy 2.0** - современный ORM
+- **Alembic** - миграции базы данных
+
+### Databases
+- **PostgreSQL 15** - основная реляционная БД
+- **Neo4j 5** - графовая БД для CEG
+- **Redis 7** - кэш и очереди
+- **RabbitMQ 3.12** - брокер сообщений
+
+### Data Collection
+- **Telethon** - клиент Telegram API
+- **httpx** - асинхронный HTTP клиент
+- **aio-pika** - асинхронный RabbitMQ клиент
+- **BeautifulSoup4** - парсинг HTML
+
+### NLP & AI
+- **Natasha** - NER для русского языка
+- **OpenAI GPT** - анализ текста и извлечение событий
+- **Qwen3-4B** - локальная альтернатива GPT
+- **FuzzyWuzzy** - нечеткое сравнение строк
+- **Pymorphy3** - морфологический анализ
+
+### Market Data
+- **MOEX ISS API** - данные Московской биржи
+- **Algopack API** - связывание компаний с тикерами
+
+### Infrastructure
+- **Docker & Docker Compose** - контейнеризация
+- **Prometheus** - мониторинг метрик
+- **Structlog** - структурированное логирование
+- **Pillow** - обработка изображений
+- **Tenacity** - retry механизмы
+
+### Development Tools
+- **pytest** - тестирование
+- **Black** - форматирование кода
+- **Flake8** - линтинг
+- **MyPy** - проверка типов
+##  Быстрый старт
 
 ### 1. Требования
 
 - **Python**: 3.12
 - **Docker**: 20.10+ с Docker Compose
 - **GPU**: NVIDIA GPU с CUDA (опционально, для векторизации)
-- **RAM**: минимум 8GB
+- **RAM**: минимум 32GB
 - **API ключи**: OpenAI API (для извлечения сущностей и генерации статей)
-
+- **20GB** свободного места
 ### 2. Установка
 
 ```bash
@@ -183,6 +363,91 @@ API_KEY=sk-your-openai-api-key
 
 # Модель для генерации статей (опционально)
 OPENAI_MODEL=gpt-5
+
+# Database
+DATABASE_URL=postgresql+asyncpg://newsuser:newspass@localhost:5432/newsdb
+DB_POOL_SIZE=20
+DB_MAX_OVERFLOW=40
+
+# Redis
+REDIS_URL=redis://localhost:6379/0
+REDIS_TTL=3600
+
+# Neo4j Graph Database
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=password123
+NEO4J_DATABASE=neo4j
+
+# RabbitMQ
+RABBITMQ_URL=amqp://admin:admin123@localhost:5672/
+RABBITMQ_EXCHANGE=news
+RABBITMQ_PREFETCH_COUNT=10
+
+# Telegram
+TELETHON_API_ID=your_api_id
+TELETHON_API_HASH=your_api_hash
+TELETHON_SESSION_NAME=news_parser
+TELETHON_PHONE=+7xxxxxxxxxx
+TELEGRAM_BATCH_SIZE=100
+TELEGRAM_BACKFILL_DAYS=365
+
+# External APIs
+ALGOPACK_API_KEY=your_algopack_key
+ALGOPACK_BASE_URL=https://api.algopack.com/v1
+
+# RAG & Vector Search
+WEAVIATE_URL=http://localhost:8080
+WEAVIATE_API_KEY=your_weaviate_key
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+VECTOR_DIMENSION=1536
+SIMILARITY_THRESHOLD=0.7
+MAX_RETRIEVAL_DOCS=10
+
+# Parsing Configuration
+PARSER_WORKERS=4
+PARSER_POLL_INTERVAL=60
+PARSER_BACKOFF_FACTOR=2.0
+PARSER_MAX_RETRIES=3
+
+# Enrichment
+ENRICHER_BATCH_SIZE=20
+ENRICHER_WORKERS=2
+NER_CONFIDENCE_THRESHOLD=0.7
+COMPANY_MATCH_THRESHOLD=0.6
+
+# Anti-spam
+ANTISPAM_THRESHOLD=5.0
+ANTISPAM_TRUSTED_THRESHOLD=8.0
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+API_WORKERS=4
+API_CORS_ORIGINS=["http://localhost:3000", "http://localhost:8080"]
+API_PAGE_SIZE=50
+API_MAX_PAGE_SIZE=200
+
+# Images
+IMAGE_MAX_SIZE_MB=15
+IMAGE_THUMBNAIL_SIZE=(400, 400)
+IMAGE_ALLOWED_TYPES=["image/jpeg", "image/png", "image/webp", "image/gif"]
+
+# Monitoring
+METRICS_PORT=9090
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+
+# Feature Flags
+ENABLE_TELEGRAM=true
+ENABLE_HTML_PARSER=true
+ENABLE_ENRICHMENT=true
+ENABLE_ANTISPAM=true
+ENABLE_METRICS=true
+
+# Development
+DEBUG=false
+TESTING=false
 ```
 
 ### 4. Запуск Weaviate
