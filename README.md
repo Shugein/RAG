@@ -8,6 +8,7 @@
 Tg_app_ui → HTTP Server → Queuery → Processing Pipeline → Weaviate Vector DB → Search → Article Generation
                 (8081)                (NER + Chunking)        (8080)           (Hybrid)      (LLM)
 ```
+![Uploading image.png…]()
 
 ## 📁 Структура проекта
 
