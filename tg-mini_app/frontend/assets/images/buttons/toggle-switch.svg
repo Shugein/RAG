@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="48" viewBox="0 0 80 48" class="off" aria-labelledby="title desc" role="switch">
+  <title id="title">PDF Toggle</title>
+  <desc id="desc">iOS-style toggle switch. Green indicates active (on).</desc>
+  <defs>
+    <!-- Active (ON) green gradient -->
+    <linearGradient id="g-on" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34C759"/>
+      <stop offset="100%" stop-color="#2EB24F"/>
+    </linearGradient>
+    <!-- Inactive (OFF) neutral bluish track -->
+    <linearGradient id="g-off" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6B7C8E" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7F91A5" stop-opacity="0.35"/>
+    </linearGradient>
+
+    <!-- Subtle glass overlay -->
+    <linearGradient id="glass" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+    </linearGradient>
+
+    <!-- Soft shadow -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="b"/>
+      <feOffset in="b" dy="1.2" result="o"/>
+      <feColorMatrix in="o" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.25 0" result="s"/>
+      <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <style>
+      :root { color-scheme: light dark; }
+      svg { cursor: pointer; }
+      .track { rx: 24; ry: 24; }
+      .knob  { cx: 24; cy: 24; r: 18; }
+      .on .track-fill  { fill: url(#g-on); }
+      .off .track-fill { fill: url(#g-off); }
+      .track-glass { fill: url(#glass); }
+      .knob-fill  { fill: #FFFFFF; }
+      .knob-gloss { fill: #FFFFFF; opacity: .55; }
+      .on .knob { transform: translateX(32px); }
+      .off .knob { transform: translateX(0); }
+      /* Focus ring for a11y */
+      svg:focus-visible .focus-ring { stroke: #60A5FA; stroke-width: 2; opacity: .9; }
+    </style>
+  </defs>
+
+  <!-- Invisible focus outline path -->
+  <rect class="focus-ring" x="2" y="2" width="76" height="44" rx="22" ry="22" fill="none" stroke="none" />
+
+  <!-- Track -->
+  <g filter="url(#shadow)">
+    <rect class="track track-fill" x="4" y="4" width="72" height="40" />
+    <rect class="track track-glass" x="4" y="4" width="72" height="40" />
+  </g>
+
+  <!-- Knob group (translate between OFF/ON) -->
+  <g class="knob" filter="url(#shadow)">
+    <circle class="knob-fill" cx="24" cy="24" r="18"/>
+    <!-- gloss highlight -->
+    <ellipse class="knob-gloss" cx="24" cy="18" rx="10" ry="5"/>
+    <!-- optional icon for "PDF" (folded corner) -->
+    <g transform="translate(16,14)" opacity="0.85">
+      <path d="M0.5 1.5 H10 L14 5.5 V16.5 H0.5 Z" fill="none" stroke="#93A3B8" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M10 1.5 V5.5 H14" fill="none" stroke="#93A3B8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

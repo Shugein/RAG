@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+<title>Quick: Энергетика</title>
+
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DE1FF"/>
+      <stop offset="100%" stop-color="#8A7DFF"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .o { fill: none; stroke: url(#grad); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .f { fill: url(#grad); }
+      .a { fill: rgba(255,255,255,0.06); }
+      .w { stroke: #ffffff; }
+    </style>
+  </defs>
+
+<rect x="3" y="3" width="58" height="58" rx="14" class="a"/>
+<!-- lightning bolt main -->
+<path d="M30 10 L18 34 H30 L26 54 L46 28 H34 L40 10 Z" class="f" filter="url(#glow)"/>
+<!-- trend line -->
+<path d="M14 44 L24 38 L32 42 L44 32 L52 28" class="o"/>
+</svg>

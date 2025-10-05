@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-RADAR Finance Mini App - Backend API Server
-FastAPI сервер для обслуживания Mini App и API endpoints с заглушкой RADAR функции
-"""
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,333 +8,197 @@ from fastapi.responses import FileResponse, JSONResponse
 from datetime import datetime
 import os
 import json
+import shutil
 from pathlib import Path
 from typing import Dict, Any
 import uvicorn
 
 class RADARMockProcessor:    
+
     def __init__(self):
-        self.mock_news_data = [
+        print("RADAR Mock Processor инициализирован с новой структурой")
+        # Создаем папку для PDF отчетов
+        self.reports_dir = Path(__file__).parent.parent / "frontend" / "assets" / "reports"
+        self.reports_dir.mkdir(exist_ok=True)
+        
+        # Путь к шаблону PDF
+        self.template_pdf = Path(__file__).parent.parent / "frontend" / "assets" / "sberbank_article.pdf"
+    
+    def query(self, query_text: str, generate_pdf: bool = False) -> Dict[str, Any]:
+
+        print(f"[MOCK RADAR] Обработка запроса: '{query_text}'")
+        
+        draft_response = {
+            'headline': f'Финансовая аналитика: {query_text}',
+            'dek': 'Ключевые события на российском финансовом рынке',
+            'variants': {
+                'social_post': f'Новости по запросу "{query_text}": Сбербанк показал рекордную прибыль, ЦБ повысил ставку до 21%. Подробности в нашем обзоре! #финансы #банки',
+                'article_draft': f'По результатам анализа запроса "{query_text}" выявлены ключевые тренды российского финансового рынка. Банковский сектор демонстрирует устойчивый рост, энергетический сектор расширяет экспорт...',
+                'alert': f'ВАЖНО: По запросу "{query_text}" обнаружены значимые изменения на рынке. ЦБ РФ повысил ключевую ставку.'
+            },
+            'key_points': [
+                'Сбербанк объявил о рекордной прибыли за 9 месяцев 2025 года',
+                'ЦБ РФ повысил ключевую ставку до 21% годовых',
+                'Газпром заключил контракты на поставку газа в Азию на $50 млрд',
+                'Банковский сектор показывает устойчивый рост кредитного портфеля',
+                'Энергетические компании увеличивают инвестиции в модернизацию'
+            ],
+            'hashtags': ['#финансы', '#банки', '#ЦБ', '#Сбербанк', '#Газпром', '#российскийрынок'],
+            'visualization_ideas': [
+                'График динамики ключевой ставки ЦБ РФ',
+                'Диаграмма прибыли крупнейших банков',
+                'Карта экспортных контрактов Газпрома',
+                'Сравнительная таблица показателей энергетических компаний'
+            ],
+            'compliance_flags': [
+                'Информация основана на публичных данных',
+                'Требуется проверка актуальности курсов валют',
+                'Рекомендуется указать источники данных'
+            ],
+            'disclaimer': 'Данная информация носит ознакомительный характер и не является инвестиционной рекомендацией. Принятие инвестиционных решений осуществляется на собственный риск.',
+            'sources': [
+                {'name': 'RBC', 'url': 'https://rbc.ru', 'reliability': 0.95},
+                {'name': 'Ведомости', 'url': 'https://vedomosti.ru', 'reliability': 0.90},
+                {'name': 'Коммерсант', 'url': 'https://kommersant.ru', 'reliability': 0.92},
+                {'name': 'Интерфакс', 'url': 'https://interfax.ru', 'reliability': 0.88}
+            ],
+            'metadata': {
+                'generation_time': 1.845,
+                'model_used': 'gpt-4o-mini',
+                'temperature': 0.7,
+                'max_tokens': 2000
+            }
+        }
+        
+        documents = [
             {
-                "id": "1",
-                "title": "🏦 Сбербанк объявил о рекордной прибыли за третий квартал",
-                "content": "Крупнейший банк России сообщил о чистой прибыли в размере 424 млрд рублей за 9 месяцев 2025 года, что на 15% превышает показатели прошлого года. Рост обусловлен увеличением кредитного портфеля и снижением резервов на возможные потери.",
-                "source": "RBC",
-                "published_dt": "04.10.2025 15:30",
-                "estimated_importance": 0.95,
-                "sector": "banks",
-                "url": "https://example.com/news1"
+                'title': 'Сбербанк объявил о рекордной прибыли за третий квартал 2025 года',
+                'source': 'RBC',
+                'text': 'Крупнейший банк России ПАО Сбербанк сообщил о чистой прибыли в размере 424 млрд рублей за 9 месяцев 2025 года, что на 15% превышает показатели аналогичного периода прошлого года. Рост прибыли обусловлен увеличением кредитного портфеля на 12% и снижением резервов на возможные потери по ссудам. Банк также отметил рост доходов от комиссионных операций и улучшение качества кредитного портфеля.',
+                'chunk_text': 'ПАО Сбербанк сообщил о чистой прибыли в размере 424 млрд рублей за 9 месяцев 2025 года, что на 15% превышает показатели прошлого года.',
+                'url': 'https://rbc.ru/finances/sberbank-profit-q3-2025',
+                'timestamp': 1728050400,  # 04.10.2025 15:30
+                'rerank_score': 0.94,
+                'hotness': 0.87,
+                'final_score': 0.91,
+                'final_position': 1,
+                'chunk_index': 0,
+                'parent_doc_id': 'sber-2025-q3-001',
+                'text_type': 'parent_document',
+                'companies': ['Сбербанк', 'ПАО Сбербанк'],
+                'company_tickers': ['SBER'],
+                'company_sectors': ['Банки', 'Финансовый сектор'],
+                'people': ['Герман Греф'],
+                'people_positions': ['Президент, Председатель Правления'],
+                'markets': ['Московская биржа', 'Российский банковский рынок'],
+                'market_types': ['equity', 'banking'],
+                'financial_metric_types': ['прибыль', 'рентабельность', 'кредитный портфель'],
+                'financial_metric_values': ['424 млрд руб', '15%', '12%'],
+                'entities_json': '{"companies": ["Сбербанк"], "metrics": ["424 млрд руб"], "growth": "15%"}'
             },
             {
-                "id": "2", 
-                "title": "⚡ Газпром подписал долгосрочные контракты на поставку газа в Азию",
-                "content": "ПАО 'Газпром' заключило соглашения с тремя крупными азиатскими компаниями на поставку природного газа общей стоимостью свыше $50 млрд. Контракты рассчитаны на период до 2030 года и предусматривают поставки через 'Силу Сибири-2'.",
-                "source": "Ведомости",
-                "published_dt": "04.10.2025 14:15",
-                "estimated_importance": 0.87,
-                "sector": "energy",
-                "url": "https://example.com/news2"
+                'title': 'ЦБ РФ повысил ключевую ставку до 21% годовых',
+                'source': 'Коммерсант',
+                'text': 'Совет директоров Банка России принял решение повысить ключевую ставку на 200 базисных пунктов до 21% годовых. Решение обусловлено необходимостью сдерживания инфляционных рисков и стабилизации курса рубля в условиях повышенной волатильности на мировых рынках. Регулятор также отметил необходимость охлаждения потребительского спроса.',
+                'chunk_text': 'Совет директоров Банка России принял решение повысить ключевую ставку на 200 базисных пунктов до 21% годовых.',
+                'url': 'https://kommersant.ru/doc/cbr-rate-increase-october-2025',
+                'timestamp': 1728036000,  # 04.10.2025 12:00
+                'rerank_score': 0.92,
+                'hotness': 0.95,
+                'final_score': 0.93,
+                'final_position': 2,
+                'chunk_index': 0,
+                'parent_doc_id': 'cbr-rate-oct-2025-001',
+                'text_type': 'parent_document',
+                'companies': ['Банк России', 'ЦБ РФ'],
+                'company_tickers': [],
+                'company_sectors': ['Центральные банки', 'Регулирование'],
+                'people': ['Эльвира Набиуллина'],
+                'people_positions': ['Председатель Банка России'],
+                'markets': ['Денежный рынок', 'Валютный рынок'],
+                'market_types': ['monetary', 'forex'],
+                'financial_metric_types': ['ключевая ставка', 'инфляция'],
+                'financial_metric_values': ['21%', '200 б.п.'],
+                'entities_json': '{"institutions": ["ЦБ РФ"], "rates": ["21%"], "change": "200 б.п."}'
             },
             {
-                "id": "3",
-                "title": "💰 ЦБ РФ повысил ключевую ставку до 21% годовых",
-                "content": "Совет директоров Банка России принял решение повысить ключевую ставку на 200 базисных пунктов до 21% годовых. Решение обусловлено необходимостью сдерживания инфляционных рисков и стабилизации курса рубля.",
-                "source": "Коммерсант",
-                "published_dt": "04.10.2025 12:00",
-                "estimated_importance": 0.92,
-                "sector": "macroeconomics",
-                "url": "https://example.com/news3"
-            },
-            {
-                "id": "4",
-                "title": "🔄 ВТБ запустил новую программу ипотечного кредитования",
-                "content": "Банк ВТБ анонсировал запуск льготной ипотечной программы с процентной ставкой от 12% годовых для покупки жилья в новостройках. Программа действует до конца 2025 года.",
-                "source": "РБК",
-                "published_dt": "04.10.2025 11:45",
-                "estimated_importance": 0.71,
-                "sector": "banks",
-                "url": "https://example.com/news4"
-            },
-            {
-                "id": "5",
-                "title": "🏭 Лукойл увеличил инвестиции в переработку на 25%",
-                "content": "Нефтяная компания 'Лукойл' объявила об увеличении капиталовложений в модернизацию нефтеперерабатывающих заводов. Общий объем инвестиций в 2025 году составит 180 млрд рублей.",
-                "source": "Интерфакс",
-                "published_dt": "04.10.2025 10:20",
-                "estimated_importance": 0.78,
-                "sector": "energy",
-                "url": "https://example.com/news5"
-            },
-            {
-                "id": "6",
-                "title": "📱 МТС запускает 5G сеть в 15 регионах России",
-                "content": "Телекоммуникационная компания МТС объявила о развертывании сетей пятого поколения в 15 крупнейших регионах России. Инвестиции в проект составят 45 млрд рублей.",
-                "source": "Ведомости",
-                "published_dt": "04.10.2025 09:15",
-                "estimated_importance": 0.68,
-                "sector": "telecom",
-                "url": "https://example.com/news6"
+                'title': 'Газпром подписал долгосрочные контракты на поставку газа в Азию',
+                'source': 'Ведомости',
+                'text': 'ПАО Газпром заключило соглашения с тремя крупными азиатскими компаниями на поставку природного газа общей стоимостью свыше $50 млрд. Контракты рассчитаны на период до 2030 года и предусматривают поставки через газопровод "Сила Сибири-2". Общий объем поставок составит до 50 млрд кубометров газа в год.',
+                'chunk_text': 'ПАО Газпром заключило соглашения на поставку природного газа общей стоимостью свыше $50 млрд через "Силу Сибири-2".',
+                'url': 'https://vedomosti.ru/business/gazprom-asia-contracts-2025',
+                'timestamp': 1728041400,  # 04.10.2025 14:15
+                'rerank_score': 0.85,
+                'hotness': 0.79,
+                'final_score': 0.82,
+                'final_position': 3,
+                'chunk_index': 0,
+                'parent_doc_id': 'gazprom-asia-2025-001',
+                'text_type': 'parent_document',
+                'companies': ['Газпром', 'ПАО Газпром'],
+                'company_tickers': ['GAZP'],
+                'company_sectors': ['Энергетика', 'Нефтегазовый сектор'],
+                'people': ['Алексей Миллер'],
+                'people_positions': ['Генеральный директор'],
+                'markets': ['Азиатский газовый рынок', 'Российский энергорынок'],
+                'market_types': ['energy', 'commodities'],
+                'financial_metric_types': ['контрактная стоимость', 'объем поставок'],
+                'financial_metric_values': ['$50 млрд', '50 млрд м³/год'],
+                'entities_json': '{"companies": ["Газпром"], "contracts": "$50 млрд", "volume": "50 млрд м³/год"}'
             }
         ]
         
-        self.mock_edisclosure_data = [
-            {
-                "id": "e1",
-                "company_info": {"name": "ПАО Сбербанк"},
-                "event_description": "Выплата промежуточных дивидендов",
-                "date": "03.10.2025",
-                "full_content": "Совет директоров ПАО Сбербанк принял решение о выплате промежуточных дивидендов в размере 22 рублей на акцию. Дата закрытия реестра: 15.10.2025.",
-                "sector": "banks"
-            },
-            {
-                "id": "e2", 
-                "company_info": {"name": "ПАО Газпром"},
-                "event_description": "Изменения в составе Правления",
-                "date": "02.10.2025",
-                "full_content": "В состав Правления ПАО Газпром включен новый член - заместитель генерального директора по стратегическому развитию.",
-                "sector": "energy"
-            }
-        ]
-    
-    def process_user_query(self, query_text: str, query_type: str = "general", sector: str = "all") -> Dict[str, Any]:
-        print(f"[MOCK] Обработка запроса: '{query_text}'")
-        print(f"[MOCK] Тип: {query_type}, Сектор: {sector}")
-        
-        filtered_news = self._filter_by_sector(self.mock_news_data, sector)
-        filtered_edisclosure = self._filter_by_sector(self.mock_edisclosure_data, sector)
-        
-        if query_type == "draft":
-            results = self._generate_draft(filtered_news, filtered_edisclosure, sector)
-        elif query_type == "hot":
-            results = self._get_hot_news(filtered_news, filtered_edisclosure, sector)
-        elif query_type == "analytics":
-            results = self._generate_analytics(filtered_news, filtered_edisclosure, sector)
-        else:
-            results = self._general_search(filtered_news, filtered_edisclosure, query_text, sector)
-        
-        response = {
-            "status": "success",
-            "query": {
-                "text": query_text,
-                "type": query_type,
-                "sector": sector,
-                "processed_at": datetime.now().isoformat()
-            },
-            "statistics": {
-                "total_sources": len(set([item.get('source') for item in filtered_news if item.get('source')])),
-                "total_news": len(filtered_news),
-                "total_edisclosure": len(filtered_edisclosure),
-                "processing_time_ms": 250
-            },
-            "results": results,
-            "visualization": {
-                "charts": self._generate_charts_data(filtered_news, sector),
-                "timeline": self._generate_timeline(filtered_news),
-                "sectors_breakdown": self._get_sectors_breakdown(filtered_news)
-            }
+        metadata = {
+            'total_time': 2.347,
+            'num_documents': len(documents),
+            'vectorizer': 'text2vec-transformers (GPU)',
+            'reranker': 'BAAI/bge-reranker-v2-m3',
+            'llm_model': 'gpt-5',
+            'use_parent_docs': True,
+            'news_type': 'mixed',
+            'tone': 'analytical'
         }
-        return response
+        
+        result = {
+            'query': query_text,
+            'draft': draft_response,
+            'documents': documents,
+            'metadata': metadata
+        }
+        
+        if generate_pdf:
+            pdf_path = self.generate_pdf_report(query_text, result)
+            result['pdf_path'] = pdf_path
+        
+        return result
     
-    def _filter_by_sector(self, data, sector):
-        """Фильтрует данные по сектору"""
-        if sector == "all":
-            return data
+    def generate_pdf_report(self, query_text: str, result_data: Dict[str, Any]) -> str:
+        """Генерирует PDF отчет на основе результатов анализа"""
+        try:
+            # Создаем уникальное имя файла (только латиница и цифры)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            import re
+            safe_query = re.sub(r'[^a-zA-Z0-9_]', '', query_text.replace(' ', '_'))[:20]
+            if not safe_query:
+                safe_query = "query"
+            pdf_filename = f"radar_report_{safe_query}_{timestamp}.pdf"
+            pdf_path = self.reports_dir / pdf_filename
             
-        sector_mapping = {
-            "banking": "banks",
-            "banks": "banks", 
-            "energy": "energy",
-            "tech": "telecom",
-            "it": "telecom"
-        }
-        
-        target_sector = sector_mapping.get(sector, sector)
-        return [item for item in data if item.get('sector') == target_sector]
-    
-    def _generate_draft(self, news_data, edisclosure_data, sector):
-        hot_news = sorted(news_data, key=lambda x: float(x.get('estimated_importance', 0)), reverse=True)[:5]
-        
-        return {
-            "title": f"Аналитический черновик: {sector}",
-            "summary": f"Краткая сводка по сектору {sector} на основе {len(news_data)} новостей и {len(edisclosure_data)} корпоративных событий",
-            "key_points": [
-                f"Обнаружено {len(hot_news)} важных событий с высоким рейтингом",
-                f"Зафиксировано {len(edisclosure_data)} корпоративных событий", 
-                f"Проанализировано {len(set([n.get('source') for n in news_data]))} источников",
-                "Рекомендуется особое внимание к изменениям ключевой ставки ЦБ",
-                "Банковский сектор показывает устойчивый рост прибыли"
-            ],
-            "hot_news": [
-                {
-                    "id": news.get('id'),
-                    "title": news.get('title', ''),
-                    "source": news.get('source', ''),
-                    "importance": float(news.get('estimated_importance', 0)),
-                    "date": news.get('published_dt', ''),
-                    "summary": news.get('content', '')[:200] + "..."
-                }
-                for news in hot_news
-            ],
-            "corporate_events": [
-                {
-                    "id": event.get('id'),
-                    "company": event.get('company_info', {}).get('name', 'Неизвестная компания'),
-                    "event_type": event.get('event_description', ''),
-                    "date": event.get('date', ''),
-                    "summary": event.get('full_content', '')[:150] + "..." if event.get('full_content') else ''
-                }
-                for event in edisclosure_data
-            ],
-            "recommendations": [
-                f"Особое внимание стоит уделить событиям в секторе {sector}",
-                "Рекомендуется мониторить изменения процентной политики ЦБ",
-                "Следует отслеживать корпоративные действия крупнейших игроков рынка",
-                "Важно учитывать влияние геополитических факторов на отрасль"
-            ]
-        }
-    
-    def _get_hot_news(self, news_data, edisclosure_data, sector):
-        """Возвращает горячие новости"""
-        hot_news = sorted(news_data, key=lambda x: float(x.get('estimated_importance', 0)), reverse=True)
-        
-        return {
-            "title": f"Горячие новости: {sector}",
-            "total_found": len(hot_news),
-            "news": [
-                {
-                    "id": news.get('id'),
-                    "title": news.get('title', ''),
-                    "content": news.get('content', '')[:300] + "...",
-                    "source": news.get('source', ''),
-                    "hotness_score": float(news.get('estimated_importance', 0)),
-                    "published_dt": news.get('published_dt', ''),
-                    "url": news.get('url', ''),
-                    "sector": sector,
-                    "tags": self._extract_tags(news.get('title', '') + ' ' + news.get('content', ''))
-                }
-                for news in hot_news
-            ]
-        }
-    
-    def _generate_analytics(self, news_data, edisclosure_data, sector):
-        sources_count = {}
-        for news in news_data:
-            source = news.get('source', 'unknown')
-            sources_count[source] = sources_count.get(source, 0) + 1
-        
-        return {
-            "title": f"Аналитический отчет: {sector}",
-            "period": "За последние 24 часа",
-            "metrics": {
-                "total_news": len(news_data),
-                "total_sources": len(sources_count),
-                "avg_importance": sum(float(n.get('estimated_importance', 0)) for n in news_data) / len(news_data) if news_data else 0,
-                "total_edisclosure": len(edisclosure_data)
-            },
-            "sources_breakdown": [
-                {"source": source, "count": count, "percentage": round(count/len(news_data)*100, 1)}
-                for source, count in sorted(sources_count.items(), key=lambda x: x[1], reverse=True)
-            ],
-            "timeline": [
-                {"date": "04.10.2025", "count": len(news_data)},
-                {"date": "03.10.2025", "count": max(1, len(news_data) - 2)},
-                {"date": "02.10.2025", "count": max(1, len(news_data) - 3)}
-            ],
-            "top_news": [
-                {
-                    "title": news.get('title', ''),
-                    "importance": float(news.get('estimated_importance', 0)),
-                    "source": news.get('source', ''),
-                    "date": news.get('published_dt', '')
-                }
-                for news in sorted(news_data, key=lambda x: float(x.get('estimated_importance', 0)), reverse=True)[:10]
-            ]
-        }
-    
-    def _general_search(self, news_data, edisclosure_data, query, sector):
-        query_words = query.lower().split()
-        
-        relevant_news = []
-        for news in news_data:
-            title = news.get('title', '').lower()
-            content = news.get('content', '').lower()
-            
-            relevance = 0
-            for word in query_words:
-                if word in title:
-                    relevance += 2
-                if word in content:
-                    relevance += 1
-            
-            if relevance > 0:
-                news_copy = news.copy()
-                news_copy['relevance'] = relevance
-                relevant_news.append(news_copy)
-        
-        relevant_news.sort(key=lambda x: x['relevance'], reverse=True)
-        
-        return {
-            "title": f"Результаты поиска: '{query}'",
-            "query": query,
-            "sector": sector,
-            "total_found": len(relevant_news),
-            "results": [
-                {
-                    "id": news.get('id'),
-                    "title": news.get('title', ''),
-                    "content": news.get('content', '')[:250] + "...",
-                    "source": news.get('source', ''),
-                    "relevance": news.get('relevance', 0),
-                    "importance": float(news.get('estimated_importance', 0)),
-                    "published_dt": news.get('published_dt', ''),
-                    "highlights": news.get('title', '')  # Упрощенная подсветка
-                }
-                for news in relevant_news
-            ]
-        }
-    
-    def _extract_tags(self, text):
-        common_tags = ['банки', 'энергетика', 'финансы', 'политика', 'рынок', 'экономика', 'прибыль', 'дивиденды']
-        text_lower = text.lower()
-        found_tags = [tag for tag in common_tags if tag in text_lower]
-        return found_tags[:3]
-    
-    def _generate_charts_data(self, news_data, sector):
-        sources = {}
-        for news in news_data:
-            source = news.get('source', 'unknown')
-            sources[source] = sources.get(source, 0) + 1
-        
-        return {
-            "sources_pie": {
-                "labels": list(sources.keys()),
-                "data": list(sources.values()),
-                "colors": ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]
-            }
-        }
-    
-    def _generate_timeline(self, news_data):
-        return [
-            {"date": "04.10.2025", "count": len(news_data)},
-            {"date": "03.10.2025", "count": max(1, len(news_data) - 1)},
-            {"date": "02.10.2025", "count": max(1, len(news_data) - 2)}
-        ]
-    
-    def _get_sectors_breakdown(self, news_data):
-        sectors = {"Банки": 0, "Энергетика": 0, "Телеком": 0, "Другое": 0}
-        
-        for news in news_data:
-            sector = news.get('sector', 'other')
-            if sector == 'banks':
-                sectors["Банки"] += 1
-            elif sector == 'energy':
-                sectors["Энергетика"] += 1
-            elif sector == 'telecom':
-                sectors["Телеком"] += 1
+            # Копируем шаблон PDF как базу для отчета
+            if self.template_pdf.exists():
+                shutil.copy2(self.template_pdf, pdf_path)
+                print(f"PDF отчет создан: {pdf_path}")
+                
+                # Возвращаем относительный путь для web доступа
+                return f"static/assets/reports/{pdf_filename}"
             else:
-                sectors["Другое"] += 1
-        
-        return sectors
+                print(f"Шаблон PDF не найден: {self.template_pdf}")
+                return None
+                
+        except Exception as e:
+            print(f"Ошибка генерации PDF: {e}")
+            return None
+
 
 radar_processor = RADARMockProcessor()
 
@@ -362,7 +222,7 @@ if frontend_path.exists():
     
     @app.get("/")
     async def serve_index():
-        index_path = frontend_path / "index-clean.html"
+        index_path = frontend_path / "index-simple.html"
         if index_path.exists():
             return FileResponse(str(index_path))
         fallback_path = frontend_path / "index.html"
@@ -405,7 +265,6 @@ SAMPLE_DATA = {
 
 @app.get("/api/health")
 async def health_check():
-    """Проверка здоровья API"""
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
@@ -414,7 +273,6 @@ async def health_check():
 
 @app.get("/api/dashboard")
 async def get_dashboard():
-    """Получить данные дашборда"""
     try:
         data = SAMPLE_DATA["dashboard"].copy()
         data["lastUpdate"] = datetime.now().strftime("%d.%m.%Y %H:%M")
@@ -424,12 +282,11 @@ async def get_dashboard():
 
 @app.get("/api/hot-news")
 async def get_hot_news(limit: int = 20):
-    """Получить горячие новости"""
     try:
         hot_news = [
             {
                 "id": "1",
-                "title": "🏦 Сбербанк объявил о рекордной прибыли за квартал",
+                "title": "Сбербанк объявил о рекордной прибыли за квартал",
                 "content": "Крупнейший банк России сообщил о превышении ожидаемых показателей прибыли на 15%. Руководство банка отмечает стабильный рост во всех сегментах бизнеса, включая корпоративное и розничное кредитование.",
                 "source": "RBC",
                 "published_dt": "03.10.2025 15:30",
@@ -437,7 +294,7 @@ async def get_hot_news(limit: int = 20):
             },
             {
                 "id": "2",
-                "title": "🏭 Газпром расширяет поставки энергоносителей в страны Азии",
+                "title": "Газпром расширяет поставки энергоносителей в страны Азии",
                 "content": "Энергетический гигант подписал долгосрочные контракты на поставку газа с тремя крупными азиатскими компаниями. Общая стоимость сделок превышает $50 млрд на период до 2030 года.",
                 "source": "Ведомости",
                 "published_dt": "03.10.2025 14:15",
@@ -445,7 +302,7 @@ async def get_hot_news(limit: int = 20):
             },
             {
                 "id": "3",
-                "title": "💰 ЦБ РФ изменил ключевую ставку до 21%",
+                "title": "ЦБ РФ изменил ключевую ставку до 21%",
                 "content": "Центральный банк России принял решение о повышении ключевой ставки на 200 базисных пунктов в ответ на усиливающиеся инфляционные риски.",
                 "source": "Коммерсант",
                 "published_dt": "03.10.2025 12:00",
@@ -459,7 +316,6 @@ async def get_hot_news(limit: int = 20):
 
 @app.get("/api/search") 
 async def search_news(q: str, limit: int = 20):
-    """Поиск новостей"""
     try:
         if not q:
             raise HTTPException(status_code=400, detail="Параметр поиска 'q' обязателен")
@@ -573,77 +429,44 @@ async def get_edisclosure_messages(limit: int = 20):
 
 @app.post("/api/process_query")
 async def process_radar_query(query_data: dict):
+
     try:
         query_text = query_data.get("query", "Тестовый запрос")
+        generate_pdf = query_data.get("generate_pdf", False)
         
         print(f"Получен запрос: '{query_text}'")
+        print(f"Генерация PDF: {generate_pdf}")
         
-        result = {
-            'query': query_text,
-            'answer': 'Согласно представленной информации, найдены релевантные данные по вашему запросу в финансовой сфере.',
-            'documents': [
-                {
-                    'title': 'Сбербанк показал рекордную прибыль',
-                    'source': 'RBC',
-                    'text': 'Сбербанк объявил о рекордной прибыли за третий квартал 2025 года. Чистая прибыль банка составила 350 млрд рублей.',
-                    'chunk_text': 'Сбербанк объявил о рекордной прибыли за третий квартал 2025 года. Чистая прибыль банка составила 350 млрд рублей.',
-                    'url': 'https://example.com/news/sberbank',
-                    'timestamp': 1728000000,
-                    'hybrid_score': 0.89,
-                    'rerank_score': 0.89,
-                    'original_position': 1,
-                    'new_position': 1,
-                    'chunk_index': 0,
-                    'parent_doc_id': 'sber-001',
-                    'text_type': 'parent_document'
-                },
-                {
-                    'title': 'ЦБ РФ повысил ключевую ставку',
-                    'source': 'Коммерсант',
-                    'text': 'Центральный банк России принял решение повысить ключевую ставку до 21% годовых в ответ на инфляционные риски.',
-                    'chunk_text': 'Центральный банк России принял решение повысить ключевую ставку до 21% годовых в ответ на инфляционные риски.',  
-                    'url': 'https://example.com/news/cbr',
-                    'timestamp': 1727950000,
-                    'hybrid_score': 0.76,
-                    'rerank_score': 0.76,
-                    'original_position': 2,
-                    'new_position': 2,
-                    'chunk_index': 0,
-                    'parent_doc_id': 'cbr-001',
-                    'text_type': 'parent_document'
-                },
-                {
-                    'title': 'Газпром заключил новые контракты',
-                    'source': 'Ведомости',
-                    'text': 'Газпром подписал долгосрочные контракты на поставку газа в страны Азии общей стоимостью 45 млрд долларов.',
-                    'chunk_text': 'Газпром подписал долгосрочные контракты на поставку газа в страны Азии общей стоимостью 45 млрд долларов.',
-                    'url': 'https://example.com/news/gazprom',
-                    'timestamp': 1727900000,
-                    'hybrid_score': 0.68,
-                    'rerank_score': 0.68,
-                    'original_position': 3,
-                    'new_position': 3,
-                    'chunk_index': 0,
-                    'parent_doc_id': 'gaz-001',
-                    'text_type': 'parent_document'
-                }
-            ],
-            'metadata': {
-                'total_time': 2.3,
-                'num_documents': 3,
-                'vectorizer': 'sergeyzh/BERTA',
-                'reranker': 'BAAI/bge-reranker-v2-m3',
-                'llm_model': 'openai/gpt-4',
-                'use_parent_docs': True
-            }
-        }
+        result = radar_processor.query(query_text, generate_pdf=generate_pdf)
         
         print(f"Запрос обработан успешно")
+        print(f"Найдено документов: {len(result.get('documents', []))}")
+        print(f"Время обработки: {result.get('metadata', {}).get('total_time', 0)} сек")
+        
         return result
         
     except Exception as e:
         print(f"Ошибка обработки запроса: {e}")
         raise HTTPException(status_code=500, detail=f"Ошибка обработки запроса: {str(e)}")
+
+@app.get("/api/download/pdf/{filename}")
+async def download_pdf_report(filename: str):
+    """Скачивание PDF отчетов"""
+    try:
+        reports_dir = Path(__file__).parent.parent / "frontend" / "assets" / "reports"
+        pdf_path = reports_dir / filename
+        
+        if not pdf_path.exists():
+            raise HTTPException(status_code=404, detail="PDF файл не найден")
+        
+        return FileResponse(
+            path=str(pdf_path),
+            filename=filename,
+            media_type='application/pdf',
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка скачивания PDF: {str(e)}")
 
 @app.get("/api/sectors")
 async def get_available_sectors():
@@ -686,7 +509,9 @@ def main():
     uvicorn.run(
         app,
         host="127.0.0.1",
+        # host="0.0.0.0",
         port=8000,
+        # port=8082,
         log_level="info",
         access_log=True
     )

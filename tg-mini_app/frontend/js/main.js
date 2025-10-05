@@ -1,13 +1,11 @@
 
 window.RadarApp = {
-    // Конфигурация
     config: {
         apiBaseUrl: '/api',
         debug: true,
         version: '1.0.0'
     },
     
-    // Состояние приложения
     state: {
         currentPage: 'dashboard',
         user: null,
@@ -19,10 +17,8 @@ window.RadarApp = {
         loading: false
     },
     
-    // Кеш данных
     cache: new Map(),
     
-    // Обработчики событий
     eventHandlers: new Map()
 };
 
@@ -40,13 +36,10 @@ async function initApp() {
         
         initNavigation();
         
-        // Настраиваем обработчики событий
         initEventHandlers();
         
-        // Загружаем начальные данные
         await loadInitialData();
         
-        // Показываем дашборд
         await showPage('dashboard');
         
         console.log('Приложение инициализировано успешно');
@@ -61,31 +54,25 @@ async function initApp() {
 function initTelegram() {
     const tg = window.Telegram.WebApp;
     
-    // Настраиваем приложение
     tg.ready();
     tg.expand();
     
-    // Настраиваем тему
     setupTheme();
     
-    // Получаем данные пользователя
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         window.RadarApp.state.user = tg.initDataUnsafe.user;
         updateUserInfo(tg.initDataUnsafe.user);
     }
     
-    // Настраиваем главную кнопку
     tg.MainButton.setText('Горячие новости');
     tg.MainButton.color = '#2AABEE';
     tg.MainButton.textColor = '#FFFFFF';
     tg.MainButton.show();
     
-    // Обработчик главной кнопки
     tg.onEvent('mainButtonClicked', () => {
         showPage('hot-news');
     });
     
-    // Сохраняем ссылку на Telegram WebApp
     window.RadarApp.telegram = tg;
     
     console.log('Telegram WebApp инициализирован');
@@ -110,14 +97,12 @@ function setupTheme() {
     const tg = window.Telegram?.WebApp;
     
     if (tg) {
-        // Применяем цветовую схему Telegram
         if (tg.colorScheme === 'dark') {
             document.body.classList.add('dark-theme');
         } else {
             document.body.classList.add('light-theme');
         }
         
-        // Устанавливаем цвета заголовка
         tg.setHeaderColor('#17212B');
         tg.setBackgroundColor('#17212B');
     }
@@ -153,11 +138,9 @@ function initNavigation() {
             if (page) {
                 showPage(page);
                 
-                // Обновляем активную кнопку
                 navButtons.forEach(btn => btn.classList.remove('active'));
                 e.target.classList.add('active');
                 
-                // Тактильная обратная связь
                 hapticFeedback('light');
             }
         });
@@ -166,39 +149,31 @@ function initNavigation() {
 
 
 function initEventHandlers() {
-    // Кнопка обновления
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', refreshData);
     }
     
-    // Кнопка помощи
     const helpBtn = document.getElementById('helpBtn');
     if (helpBtn) {
         helpBtn.addEventListener('click', showHelp);
     }
     
-    // Обработка ошибок
     window.addEventListener('error', (e) => {
-        console.error('❌ JavaScript ошибка:', e.error);
+        console.error('JavaScript ошибка:', e.error);
         showError('Произошла ошибка приложения');
     });
     
-    // Обработка неперехваченных промисов
     window.addEventListener('unhandledrejection', (e) => {
         console.error('Неперехваченная ошибка промиса:', e.reason);
         showError('Ошибка загрузки данных');
     });
 }
 
-/**
- * Загрузка начальных данных
- */
 async function loadInitialData() {
     try {
         showLoading(true);
         
-        // Загружаем данные дашборда
         const dashboardData = await fetchDashboardData();
         window.RadarApp.state.data.dashboard = dashboardData;
         
@@ -212,9 +187,6 @@ async function loadInitialData() {
     }
 }
 
-/**
- * Показать страницу
- */
 async function showPage(pageName) {
     try {
         console.log(` Переход на страницу: ${pageName}`);
@@ -225,7 +197,6 @@ async function showPage(pageName) {
         const mainContent = document.getElementById('mainContent');
         if (!mainContent) return;
         
-        // Генерируем контент для страницы
         let content = '';
         
         switch (pageName) {
@@ -245,13 +216,11 @@ async function showPage(pageName) {
                 content = '<div class="alert alert-warning">Страница не найдена</div>';
         }
         
-        // Обновляем контент с анимацией
         mainContent.style.opacity = '0';
         setTimeout(() => {
             mainContent.innerHTML = content;
             mainContent.style.opacity = '1';
             
-            // Инициализируем обработчики для новой страницы
             initPageHandlers(pageName);
         }, 150);
         
@@ -263,16 +232,11 @@ async function showPage(pageName) {
     }
 }
 
-/**
- * Инициализация обработчиков для конкретной страницы
- */
 function initPageHandlers(pageName) {
-    // Общие обработчики
     document.querySelectorAll('[data-action]').forEach(element => {
         element.addEventListener('click', handleAction);
     });
     
-    // Специфичные обработчики для страниц
     switch (pageName) {
         case 'search':
             initSearchHandlers();
@@ -283,9 +247,6 @@ function initPageHandlers(pageName) {
     }
 }
 
-/**
- * Обработчик действий
- */
 function handleAction(e) {
     const action = e.target.dataset.action;
     const data = e.target.dataset;
@@ -307,21 +268,15 @@ function handleAction(e) {
     hapticFeedback('light');
 }
 
-/**
- * Обновление данных
- */
 async function refreshData() {
     try {
         hapticFeedback('medium');
         showLoading(true);
         
-        // Очищаем кеш
         window.RadarApp.cache.clear();
         
-        // Перезагружаем данные текущей страницы
         await showPage(window.RadarApp.state.currentPage);
         
-        // Показываем уведомление
         showNotification('Данные обновлены!', 'success');
         
     } catch (error) {
@@ -332,9 +287,6 @@ async function refreshData() {
     }
 }
 
-/**
- * Показать помощь
- */
 function showHelp() {
     const helpContent = `
         <div class="modal-content">
@@ -361,9 +313,6 @@ function showHelp() {
     showModal(helpContent);
 }
 
-/**
- * Тактильная обратная связь
- */
 function hapticFeedback(type = 'light') {
     const tg = window.RadarApp.telegram;
     if (tg && tg.HapticFeedback) {
@@ -371,30 +320,21 @@ function hapticFeedback(type = 'light') {
     }
 }
 
-/**
- * Показать уведомление
- */
 function showNotification(message, type = 'info') {
     const tg = window.RadarApp.telegram;
     if (tg) {
         tg.showAlert(message);
     } else {
-        // Fallback для режима разработки
         alert(message);
     }
 }
 
-/**
- * Показать ошибку
- */
+
 function showError(message) {
     console.error(' Ошибка:', message);
     showNotification(message, 'error');
 }
 
-/**
- * Показать/скрыть индикатор загрузки
- */
 function showLoading(show) {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
@@ -408,31 +348,20 @@ function showLoading(show) {
     window.RadarApp.state.loading = show;
 }
 
-/**
- * Показать модальное окно
- */
+
 function showModal(content) {
-    // TODO: Реализовать модальные окна
     console.log('Модальное окно:', content);
 }
 
-/**
- * Закрыть модальное окно
- */
 function closeModal() {
-    // TODO: Реализовать закрытие модального окна
     console.log('Закрытие модального окна');
 }
 
-/**
- * Инициализация при загрузке DOM
- */
 document.addEventListener('DOMContentLoaded', () => {
     console.log('RADAR Finance Mini App - Запуск');
     initApp();
 });
 
-// Экспорт для глобального использования
 window.RadarApp.showPage = showPage;
 window.RadarApp.refreshData = refreshData;
 window.RadarApp.showHelp = showHelp;

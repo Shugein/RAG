@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RADAR Finance</title>
-    <scriptParser.src="https://cdn.tailwindcss.com"></script>
-    <scriptParser.src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: system-ui, sans-serif;
@@ -18,19 +18,125 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        
+        .quick-action-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quick-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .quick-action-btn:hover::before {
+            left: 100%;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes radar-ping {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s infinite;
+        }
+        
+        .radar-sweep {
+            animation: radar-sweep 4s linear infinite;
+        }
+        
+        .radar-ping {
+            animation: radar-ping 2s ease-in-out infinite;
+        }
+        
+        /* Чистый градиентный фон без изображений */
+        .financial-bg {
+            background: linear-gradient(135deg, 
+                #667eea 0%, 
+                #764ba2 25%, 
+                #f093fb 50%, 
+                #667eea 75%, 
+                #764ba2 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Тонкий паттерн поверх градиента */
+        .financial-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 60px 60px, 40px 40px;
+            pointer-events: none;
+        }
+        
+        /* Glassmorphism с паттерном */
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Фильтры для иконок - делаем их белыми */
+        .icon-white {
+            filter: brightness(0) invert(1);
+        }
+        
+        .icon-colored {
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+        }
+        
+        /* Улучшенные quick action кнопки */
+        .quick-action-enhanced {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .quick-action-enhanced:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.2) 100%);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800">
+<body class="bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 financial-bg">
     <div id="app" class="min-h-screen">
-        <!-- Hero Section -->
         <div class="relative overflow-hidden">
-            <!-- Header -->
             <header class="relative z-10 pt-8 pb-6">
                 <div class="max-w-4xl mx-auto px-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center glassmorphism">
-                                <span class="text-2xl">📊</span>
+                                <span class="text-2xl"></span>
                             </div>
                             <div>
                                 <h1 class="text-2xl font-bold text-white">RADAR Finance</h1>
@@ -41,25 +147,45 @@
                 </div>
             </header>
 
-            <!-- Main Query Interface -->
             <main class="relative z-10 pb-20">
                 <div class="max-w-4xl mx-auto px-6">
-                    <!-- Welcome Message -->
                     <div class="text-center mb-12">
-                        <h2 class="text-4xl font-bold text-white mb-4">
-                            Добро пожаловать в RADAR
-                        </h2>
-                        <p class="text-white/90 text-lg max-w-2xl mx-auto leading-relaxed">
-                            Получайте актуальную финансовую аналитику и данные по любому сектору экономики. 
-                            Просто задайте ваш вопрос естественным языком.
+                        <div class="flex items-center justify-center mb-6">
+                            <div class="relative w-16 h-16 bg-gradient-to-br from-white/20 to-white/10 rounded-2xl flex items-center justify-center glassmorphism mr-4">
+                                <div class="absolute inset-0 rounded-2xl border-2 border-white/30 radar-ping"></div>
+                                <img src="static/assets/images/logos/radar-logo.svg" alt="RADAR" class="w-10 h-10 radar-sweep icon-white" />
+                            </div>
+                            <div>
+                                <h2 class="text-4xl md:text-5xl font-bold text-white">
+                                    <span class="bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+                                        RADAR
+                                    </span>
+                                </h2>
+                                <div class="text-lg text-white/80 font-normal">Finance Analytics</div>
+                            </div>
+                        </div>
+                        <p class="text-white/90 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-4">
+                            Получайте актуальную финансовую аналитику и горячие данные по любому сектору экономики
                         </p>
+                        <div class="flex items-center justify-center space-x-6 text-white/80 text-sm mb-8">
+                            <div class="flex items-center bg-white/10 px-3 py-2 rounded-full">
+                                <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                                Real-time данные
+                            </div>
+                            <div class="flex items-center bg-white/10 px-3 py-2 rounded-full">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
+                                AI аналитика
+                            </div>
+                            <div class="flex items-center bg-white/10 px-3 py-2 rounded-full">
+                                <div class="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
+                                PDF отчеты
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Query Form -->
                     <div class="max-w-3xl mx-auto mb-12">
                         <div class="glassmorphism rounded-3xl p-8 shadow-2xl">
                             <form id="queryForm" class="space-y-6">
-                                <!-- Query Input -->
                                 <div class="space-y-2">
                                     <label for="queryInput" class="block text-white font-medium text-sm">
                                         Ваш запрос
@@ -75,7 +201,24 @@
                                     </div>
                                 </div>
 
-                                <!-- Submit Button -->
+                                <!-- PDF Generation Toggle -->
+                                <div class="flex items-center justify-between bg-gradient-to-r from-white/15 to-white/10 border border-white/25 rounded-2xl p-4 backdrop-blur-sm">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                            <span class="text-xl">📄</span>
+                                        </div>
+                                        <div>
+                                            <div class="text-white font-medium text-sm">Создать PDF отчет</div>
+                                            <div class="text-white/80 text-xs">Скачать результат в виде красивого PDF документа</div>
+                                        </div>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="generatePdfToggle" class="sr-only peer">
+                                        <div class="relative w-11 h-6 bg-white/20 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-400/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-green-400 peer-checked:to-green-500 shadow-lg">
+                                        </div>
+                                    </label>
+                                </div>
+
                                 <div class="pt-4">
                                     <button 
                                         type="submit" 
@@ -89,7 +232,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
                     <div class="max-w-3xl mx-auto">
                         <div class="text-center mb-6">
                             <h3 class="text-white font-semibold text-lg mb-2">Быстрые действия</h3>
@@ -97,22 +239,40 @@
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <button class="quick-action-btn glassmorphism rounded-2xl p-6 text-left hover:bg-white/20 transition-all duration-300" data-query="Данные по банковскому сектору за сегодня">
-                                <div class="text-2xl mb-2">🏦</div>
-                                <div class="text-white font-medium mb-1">Банки сегодня</div>
-                                <div class="text-white/70 text-sm">Актуальные данные банковского сектора</div>
+                            <button class="quick-action-btn quick-action-enhanced rounded-2xl p-6 text-left hover:scale-105 transition-all duration-300 group" data-query="Горячие данные по банковскому сектору за сегодня с аналитикой прибыли и кредитного портфеля">
+                                <div class="mb-3 group-hover:scale-110 transition-transform">
+                                    <img src="static/assets/images/quick-actions/quick-banking.svg" alt="Banking" class="w-12 h-12 icon-white" />
+                                </div>
+                                <div class="text-white font-bold mb-2 text-lg">Банки сегодня</div>
+                                <div class="text-white/90 text-sm leading-relaxed">Актуальные данные банковского сектора с финансовыми показателями</div>
+                                <div class="mt-3 flex items-center text-white/70 text-xs">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                                    <span class="bg-gradient-to-r from-green-400/20 to-blue-400/20 px-3 py-1 rounded-full border border-white/20">Горячие данные</span>
+                                </div>
                             </button>
                             
-                            <button class="quick-action-btn glassmorphism rounded-2xl p-6 text-left hover:bg-white/20 transition-all duration-300" data-query="Аналитический обзор энергетического сектора с ключевыми трендами">
-                                <div class="text-2xl mb-2">⚡</div>
-                                <div class="text-white font-medium mb-1">Энергетика</div>
-                                <div class="text-white/70 text-sm">Тренды и аналитика энергосектора</div>
+                            <button class="quick-action-btn quick-action-enhanced rounded-2xl p-6 text-left hover:scale-105 transition-all duration-300 group" data-query="Аналитический обзор энергетического сектора с ключевыми трендами нефти и газа">
+                                <div class="mb-3 group-hover:scale-110 transition-transform">
+                                    <img src="static/assets/images/quick-actions/quick-energy.svg" alt="Energy" class="w-12 h-12 icon-white" />
+                                </div>
+                                <div class="text-white font-bold mb-2 text-lg">Энергетика</div>
+                                <div class="text-white/90 text-sm leading-relaxed">Тренды и аналитика энергосектора, цены на нефть и газ</div>
+                                <div class="mt-3 flex items-center text-white/70 text-xs">
+                                    <div class="w-2 h-2 bg-orange-400 rounded-full mr-2 animate-pulse"></div>
+                                    <span class="bg-gradient-to-r from-orange-400/20 to-red-400/20 px-3 py-1 rounded-full border border-white/20">Трендовый анализ</span>
+                                </div>
                             </button>
                             
-                            <button class="quick-action-btn glassmorphism rounded-2xl p-6 text-left hover:bg-white/20 transition-all duration-300" data-query="Топ новости всех секторов с рейтингом важности">
-                                <div class="text-2xl mb-2">📈</div>
-                                <div class="text-white font-medium mb-1">Топ новости</div>
-                                <div class="text-white/70 text-sm">Важнейшие события по всем секторам</div>
+                            <button class="quick-action-btn quick-action-enhanced rounded-2xl p-6 text-left hover:scale-105 transition-all duration-300 group" data-query="Топ самых важных новостей всех секторов с рейтингом важности и влиянием на рынок">
+                                <div class="mb-3 group-hover:scale-110 transition-transform">
+                                    <img src="static/assets/images/quick-actions/quick-news.svg" alt="News" class="w-12 h-12 icon-white" />
+                                </div>
+                                <div class="text-white font-bold mb-2 text-lg">Топ новости</div>
+                                <div class="text-white/90 text-sm leading-relaxed">Важнейшие события по всем секторам с рейтингом влияния</div>
+                                <div class="mt-3 flex items-center text-white/70 text-xs">
+                                    <div class="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
+                                    <span class="bg-gradient-to-r from-purple-400/20 to-pink-400/20 px-3 py-1 rounded-full border border-white/20">Рейтинг важности</span>
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -120,10 +280,8 @@
             </main>
         </div>
 
-        <!-- Results Section -->
         <div id="resultsSection" class="hidden min-h-screen bg-white">
             <div class="max-w-6xl mx-auto px-6 py-8">
-                <!-- Results Header -->
                 <div class="flex items-center justify-between mb-8">
                     <div>
                         <h2 class="text-3xl font-bold text-gray-900 mb-2">Результаты RADAR</h2>
@@ -134,24 +292,32 @@
                     </button>
                 </div>
 
-                <!-- Results Content -->
                 <div id="resultsContent" class="space-y-6">
-                    <!-- Контент будет загружен динамически -->
                 </div>
             </div>
         </div>
 
-        <!-- Loading Overlay -->
         <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-            <div class="bg-white rounded-3xl p-8 max-w-sm mx-auto text-center glassmorphism">
-                <div class="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Обработка запроса</h3>
-                <p class="text-gray-600 text-sm">RADAR анализирует данные...</p>
+            <div class="bg-white/10 backdrop-blur-md rounded-3xl p-8 max-w-sm mx-auto text-center glassmorphism border border-white/20">
+                <div class="mb-4 relative">
+                    <div class="w-16 h-16 mx-auto relative">
+                        <div class="absolute inset-0 border-4 border-white/20 rounded-full"></div>
+                        <div class="absolute inset-0 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div class="absolute inset-2 bg-white/10 rounded-full flex items-center justify-center">
+                            <span class="text-xl"></span>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Обработка запроса</h3>
+                <p class="text-white/80 text-sm mb-4">RADAR анализирует данные...</p>
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span class="text-white/70 text-xs">AI обработка</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <scriptParser.src="js/query-interface.js"></script>
+    <script src="js/query-interface.js"></script>
 </body>
 </html>

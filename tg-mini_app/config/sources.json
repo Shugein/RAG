@@ -25,7 +25,7 @@
       "enabled": true,
       "priority": 2,
       "color": "#3498db",
-      "icon": "📊",
+      "icon": "",
       "description": "Деловая газета о бизнесе и экономике",
       "website": "https://www.vedomosti.ru",
       "categories": ["business", "economics", "finance", "analytics"],
@@ -43,7 +43,7 @@
       "enabled": true,
       "priority": 3,
       "color": "#2c3e50",
-      "icon": "💼",
+      "icon": "",
       "description": "Деловая газета и информационное агентство",
       "website": "https://www.kommersant.ru",
       "categories": ["business", "politics", "economics", "finance"],
@@ -61,7 +61,7 @@
       "enabled": true,
       "priority": 4,
       "color": "#27ae60",
-      "icon": "📈",
+      "icon": "",
       "description": "Официальные сообщения Московской биржи",
       "website": "https://www.moex.com",
       "categories": ["markets", "trading", "securities", "regulations"],
@@ -79,7 +79,7 @@
       "enabled": true,
       "priority": 5,
       "color": "#9b59b6",
-      "icon": "📡",
+      "icon": "",
       "description": "Информационное агентство Интерфакс",
       "website": "https://www.interfax.ru",
       "categories": ["news", "economics", "politics", "business"],
@@ -97,7 +97,7 @@
       "enabled": true,
       "priority": 6,
       "color": "#f39c12",
-      "icon": "🏛️",
+      "icon": "",
       "description": "Система раскрытия корпоративной информации",
       "website": "https://e-disclosure.ru",
       "categories": ["corporate", "disclosure", "regulations", "companies"],
@@ -114,42 +114,42 @@
       "id": "economics",
       "name": "Экономика",
       "color": "#3498db",
-      "icon": "💰",
+      "icon": "",
       "description": "Макроэкономические новости и аналитика"
     },
     {
       "id": "business",
       "name": "Бизнес",
       "color": "#2c3e50",
-      "icon": "💼",
+      "icon": "",
       "description": "Корпоративные новости и бизнес-события"
     },
     {
       "id": "markets",
       "name": "Рынки",
       "color": "#27ae60",
-      "icon": "📈",
+      "icon": "",
       "description": "Финансовые рынки и биржевая торговля"
     },
     {
       "id": "companies",
       "name": "Компании",
       "color": "#e74c3c",
-      "icon": "🏢",
+      "icon": "",
       "description": "Новости публичных компаний"
     },
     {
       "id": "regulations",
       "name": "Регулирование",
       "color": "#f39c12",
-      "icon": "⚖️",
+      "icon": "",
       "description": "Нормативные акты и регулирование"
     },
     {
       "id": "analytics",
       "name": "Аналитика",
       "color": "#9b59b6",
-      "icon": "📊",
+      "icon": "",
       "description": "Аналитические материалы и исследования"
     }
   ],
