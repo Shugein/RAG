@@ -75,7 +75,7 @@ except ImportError:
 ```python
 # Добавлено:
 try:
-    from src.services.market_data_service import MarketDataService
+    from Parser.src.services.market_data_service import MarketDataService
     self.market_data_service = MarketDataService()
     await self.market_data_service.initialize()
 except ImportError:
@@ -95,17 +95,17 @@ except ImportError:
 Все компоненты успешно протестированы:
 
 ```bash
-python -c "from src.services.impact_calculator import ImpactCalculator; print('ImpactCalculator OK')"
+python -c "from Parser.src.services.impact_calculator import ImpactCalculator; print('ImpactCalculator OK')"
 # Output: ImpactCalculator OK
 
-python -c "from src.services.covariance_service import CovarianceService; print('CovarianceService OK')"
+python -c "from Parser.src.services.covariance_service import CovarianceService; print('CovarianceService OK')"
 # Output: CovarianceService OK
 
-python -c "from src.services.enricher.enrichment_service import EnrichmentService; print('EnrichmentService OK')"
+python -c "from Parser.src.services.enricher.enrichment_service import EnrichmentService; print('EnrichmentService OK')"
 # Output: EnrichmentService OK
 
-python -c "from src.services.telegram_parser.parser import TelegramParser; print('TelegramParser OK')"
-# Output: TelegramParser OK
+python -c "from Parser.src.services.telegram_parser.parser import Telegram_Parser; print('Telegram_Parser OK')"
+# Output: Telegram_Parser OK
 ```
 
 Система готова к работе! 🎉

@@ -12,9 +12,9 @@ from datetime import datetime
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.services.enricher.topic_classifier import TopicClassifier, ClassificationResult
-from src.services.enricher.sector_mapper import SectorMapper, SectorTaxonomy
-from src.graph_models import News, Company, NewsType, NewsSubtype
+from Parser.src.services.enricher.topic_classifier import TopicClassifier, ClassificationResult
+from Parser.src.services.enricher.sector_mapper import SectorMapper, SectorTaxonomy
+from Parser.src.graph_models import News, Company, NewsType, NewsSubtype
 
 
 async def test_sector_mapper():

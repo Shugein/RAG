@@ -15,10 +15,10 @@ from telethon.tl.types import Message
 import aio_pika
 from aio_pika import Message as AMQPMessage, ExchangeType
 
-from src.core.config import settings
-from src.graph_models import News, NewsType
-from src.services.telegram_parser.antispam import AntiSpamFilter
-from src.utils.text_utils import calculate_content_hash, detect_language
+from Parser.src.core.config import settings
+from Parser.src.graph_models import News, NewsType
+from Parser.src.services.telegram_parser.antispam import AntiSpamFilter
+from Parser.src.utils.text_utils import calculate_content_hash, detect_language
 
 logger = logging.getLogger(__name__)
 

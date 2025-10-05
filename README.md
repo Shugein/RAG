@@ -14,7 +14,7 @@ Tg_app_ui → HTTP Server → Queuery → Processing Pipeline → Weaviate Vecto
 ```
 RAG/
 radar-ai/
-├── src/
+├──Parser.src/
 │   ├── download/                    # Модули загрузки и приема данных
 │   │   ├── downloader_functions.py # Загрузка и подготовка данных (с NER)
 │   │   └── check_collection.py     # Проверка коллекций Weaviate
@@ -40,7 +40,7 @@ radar-ai/
 │   ├── config/                   # Конфигурационные файлы
 │   │   ├── sources.yml           # Настройки источников
 │   │   └── ad_rules.yml          # Правила фильтрации рекламы
-│   ├── src/
+│   ├──Parser.src/
 │   │   ├── __init__.py
 │   │   ├── core/
 │   │   │   ├── __init__.py
@@ -179,7 +179,7 @@ radar-ai/
 - **database.py** - SQLAlchemy engine и сессии
 - **models.py** - ORM модели для всех таблиц
 
-### Telegram Parser Service
+### Telegram_Parser Service
 - **client.py** - инициализация Telethon клиента
 - **parser.py** - основная логика парсинга сообщений
 - **antispam.py** - многоуровневая фильтрация рекламы
@@ -229,7 +229,7 @@ radar-ai/
 - **generator.py** - генерация ответов на основе найденных документов
 - **rag_pipeline.py** - основной RAG пайплайн
 
-### RAG Core Components (в корне src/)
+### RAG Core Components (в корнеParser.src/)
 - **download/** - модули загрузки и приема данных
 - **system/** - ядро RAG системы
 - **system/LLM_final/** - генерация статей
@@ -489,7 +489,7 @@ alembic upgrade head
 
 ```bash
 # Создать коллекцию и загрузить тестовые данные
-python src/system/vdb.py
+pythonParser.src/system/vdb.py
 ```
 
 **Что происходит:**
@@ -518,7 +518,7 @@ python scripts/start_api.py
 
 ```bash
 # Проверить содержимое БД
-python src/download/check_collection.py
+pythonParser.src/download/check_collection.py
 ```
 
 **Вывод:**
@@ -532,7 +532,7 @@ python src/download/check_collection.py
 
 ```bash
 # Запустить RAG пайплайн
-python src/system/engine.py
+pythonParser.src/system/engine.py
 ```
 
 **Что происходит:**
@@ -731,7 +731,7 @@ Search Results (с сущностями)
 ### Пример 1: Поиск с разными alpha
 
 ```python
-from src.system.engine import RAGPipeline
+from Parser.src.system.engine import RAGPipeline
 
 rag = RAGPipeline()
 rag.connect()
@@ -777,7 +777,7 @@ result = rag.query(
 ### Пример 3: Сохранение статьи в PDF
 
 ```python
-from src.system.LLM_final.output import save_article_pdf
+from Parser.src.system.LLM_final.output import save_article_pdf
 
 # Генерируем статью
 result = rag.query(user_query="...")
@@ -796,7 +796,7 @@ print(f"PDF сохранён: {pdf_path}")
 ### Python API
 
 ```python
-from src.system.engine import RAGPipeline
+from Parser.src.system.engine import RAGPipeline
 
 # Инициализация
 rag = RAGPipeline(collection_name="NewsChunks")
@@ -852,13 +852,13 @@ text2vec-transformers:
 
 ```bash
 # Проверьте количество объектов в БД
-python src/download/check_collection.py
+pythonParser.src/download/check_collection.py
 ```
 
 Если коллекция пустая:
 ```bash
 # Загрузите данные
-python src/system/vdb.py
+pythonParser.src/system/vdb.py
 ```
 
 ## 📈 Производительность

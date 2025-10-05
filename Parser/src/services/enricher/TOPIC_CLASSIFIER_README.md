@@ -44,7 +44,7 @@
 
 **Инициализация:**
 ```python
-from src.services.enricher.topic_classifier import TopicClassifier, SectorTaxonomy
+from Parser.src.services.enricher.topic_classifier import TopicClassifier, SectorTaxonomy
 
 classifier = TopicClassifier(taxonomy=SectorTaxonomy.ICB)
 await classifier.initialize()
@@ -94,8 +94,8 @@ class ClassificationResult:
 ### Базовый пример:
 
 ```python
-from src.services.enricher.topic_classifier import TopicClassifier
-from src.graph_models import News, Company
+from Parser.src.services.enricher.topic_classifier import TopicClassifier
+from Parser.src.graph_models import News, Company
 
 # Инициализация
 classifier = TopicClassifier()
@@ -468,7 +468,7 @@ ORDER BY n.published_at DESC
 
 ```python
 # В enrichment_service.py
-from src.services.enricher.topic_classifier import TopicClassifier
+from Parser.src.services.enricher.topic_classifier import TopicClassifier
 
 class EnrichmentService:
     def __init__(self):

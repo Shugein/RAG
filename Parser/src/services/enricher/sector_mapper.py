@@ -1,4 +1,4 @@
-# src/services/enricher/sector_mapper.py
+#Parser.src/services/enricher/sector_mapper.py
 """
 Маппинг компаний по отраслям (ICB/GICS/NACE)
 Интеграция с графовой моделью

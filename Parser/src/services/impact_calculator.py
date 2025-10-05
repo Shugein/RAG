@@ -1,4 +1,4 @@
-# src/services/impact_calculator.py
+#Parser.src/services/impact_calculator.py
 """
 Сервис для расчета влияния новостей на компании
 Реализует логику AFFECTS связей из Project Charter
@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from enum import Enum
 
-from src.core.config import settings
-from src.graph_models import GraphService
+from Parser.src.core.config import settings
+from Parser.src.graph_models import GraphService
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ class ImpactCalculator:
         
         # Инициализируем market data service
         try:
-            from src.services.market_data_service import MarketDataService
+            from Parser.src.services.market_data_service import MarketDataService
             self.market_data_service = MarketDataService()
             await self.market_data_service.initialize()
         except ImportError:

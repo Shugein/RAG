@@ -83,8 +83,8 @@ Write-Host "Starting services in separate windows..." -ForegroundColor Yellow
 # API сервер
 Start-ServiceInNewWindow -ServiceName "API" -ScriptPath "scripts\start_api.py" -Title "News Aggregator API"
 
-# Telegram Parser
-Start-ServiceInNewWindow -ServiceName "TelegramParser" -ScriptPath "scripts\start_telegram_parser.py" -Title "Telegram Parser"
+# Telegram_Parser
+Start-ServiceInNewWindow -ServiceName "Telegram_Parser" -ScriptPath "scripts\start_telegram_parser.py" -Title "Telegram_Parser"
 
 # Outbox Relay
 Start-ServiceInNewWindow -ServiceName "OutboxRelay" -ScriptPath "scripts\start_outbox_relay.py" -Title "Outbox Relay"

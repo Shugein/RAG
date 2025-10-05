@@ -1,4 +1,4 @@
-# src/services/moex/moex_prices.py
+#Parser.src/services/moex/moex_prices.py
 """
 MOEX Price Service via Algopack API - получение исторических и текущих цен MOEX
 Event Study Analysis - расчет AR, CAR, volume spikes
@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import httpx
 from statistics import mean, stdev
 
-from src.core.config import settings
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,8 @@ class MOEXPriceService:
             headers={
                 "Authorization": f"Bearer {settings.ALGOPACK_API_KEY}",
                 "User-Agent": "RADAR-AI-CEG/1.0"
-            }
+            },
+            trust_env=False  # Ignore environment proxy settings
         )
         self.base_url = settings.ALGOPACK_BASE_URL
 

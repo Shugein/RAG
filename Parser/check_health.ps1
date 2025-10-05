@@ -55,7 +55,7 @@ Test-DockerContainer -ContainerName "news-postgres" -ServiceName "PostgreSQL"
 Test-DockerContainer -ContainerName "news-rabbitmq" -ServiceName "RabbitMQ"
 Test-DockerContainer -ContainerName "news-redis" -ServiceName "Redis"
 Test-DockerContainer -ContainerName "news-api" -ServiceName "API Server"
-Test-DockerContainer -ContainerName "news-telegram-parser" -ServiceName "Telegram Parser"
+Test-DockerContainer -ContainerName "news-telegram-parser" -ServiceName "Telegram_Parser"
 Test-DockerContainer -ContainerName "news-outbox-relay" -ServiceName "Outbox Relay"
 Test-DockerContainer -ContainerName "news-enricher" -ServiceName "Enricher"
 

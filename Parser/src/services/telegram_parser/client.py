@@ -1,4 +1,4 @@
-# src/services/telegram_parser/client.py
+#Parser.src/services/telegram_parser/client.py
 
 import asyncio
 import logging
@@ -7,7 +7,7 @@ from typing import Optional
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from src.core.config import settings
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 

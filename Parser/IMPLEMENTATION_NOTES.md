@@ -125,7 +125,7 @@ python -m deeppavlov install ner_multi_bert
 
 ---
 
-## 🔧 Настройка в src/core/config.py
+## 🔧 Настройка вParser.src/core/config.py
 
 Добавьте следующие настройки в класс `Settings`:
 
@@ -152,7 +152,7 @@ USE_DEEPPAVLOV_NER: bool = False  # Включить если установле
 ### NERExtractor
 
 ```python
-from src.services.enricher.ner_extractor import NERExtractor
+from Parser.src.services.enricher.ner_extractor import NERExtractor
 
 # С DeepPavlov (если установлен)
 extractor = NERExtractor(use_deeppavlov=True)
@@ -171,7 +171,7 @@ for entity in entities:
 ### EventPublisher
 
 ```python
-from src.services.outbox.publisher import EventPublisher
+from Parser.src.services.outbox.publisher import EventPublisher
 
 async with get_db_session() as session:
     publisher = EventPublisher(session)
@@ -200,7 +200,7 @@ docker-compose up outbox-relay
 ### Проверка статистики outbox
 
 ```python
-from src.services.outbox.relay import OutboxRelay
+from Parser.src.services.outbox.relay import OutboxRelay
 
 relay = OutboxRelay()
 stats = await relay.get_statistics()
@@ -216,7 +216,7 @@ print(stats)
 ### Health Check
 
 ```python
-from src.services.outbox.relay import OutboxRelayHealthCheck
+from Parser.src.services.outbox.relay import OutboxRelayHealthCheck
 
 health = OutboxRelayHealthCheck(relay)
 is_healthy = await health.is_healthy()
@@ -261,7 +261,7 @@ ps aux | grep outbox_relay
 tail -f logs/outbox_relay.log
 
 # 3. Проверьте статистику
-python -c "from src.services.outbox.relay import OutboxRelay; import asyncio; relay = OutboxRelay(); print(asyncio.run(relay.get_statistics()))"
+python -c "from Parser.src.services.outbox.relay import OutboxRelay; import asyncio; relay = OutboxRelay(); print(asyncio.run(relay.get_statistics()))"
 ```
 
 ---

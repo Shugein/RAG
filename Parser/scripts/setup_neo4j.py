@@ -12,8 +12,8 @@ from datetime import datetime
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.config import settings
-from src.graph_models import GraphService, News, Company, Sector, Country, NewsType, NewsSubtype
+from Parser.src.core.config import settings
+from Parser.src.graph_models import GraphService, News, Company, Sector, Country, NewsType, NewsSubtype
 
 
 async def test_neo4j_connection():

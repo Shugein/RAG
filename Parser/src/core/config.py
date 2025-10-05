@@ -1,4 +1,4 @@
-# src/core/config.py
+#Parser.src/core/config.py
 
 from typing import Optional, Dict, Any, List
 from pathlib import Path

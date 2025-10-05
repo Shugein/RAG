@@ -7,10 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import make_asgi_app
 
-from src.core.config import settings
-from src.core.database import init_db, close_db
-from src.api.endpoints import news, sources, health, jobs, ceg, importance, watchers
-from src.utils.logging import setup_logging
+from Parser.src.core.config import settings
+from Parser.src.core.database import init_db, close_db
+from Parser.src.api.endpoints import news, sources, health, jobs, ceg, importance, watchers
+from Parser.src.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 

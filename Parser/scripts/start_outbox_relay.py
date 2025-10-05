@@ -13,10 +13,10 @@ from pathlib import Path
 # Добавляем корень проекта в PATH
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.config import settings
-from src.core.database import init_db, close_db
-from src.services.outbox.relay import OutboxRelay, OutboxRelayHealthCheck
-from src.utils.logging import setup_logging
+from Parser.src.core.config import settings
+from Parser.src.core.database import init_db, close_db
+from Parser.src.services.outbox.relay import OutboxRelay, OutboxRelayHealthCheck
+from Parser.src.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 

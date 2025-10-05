@@ -1,4 +1,4 @@
-# src/utils/logging.py
+#Parser.src/utils/logging.py
 """
 Настройка логирования для всего приложения
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import structlog
-from src.core.config import settings
+from Parser.src.core.config import settings
 
 
 def setup_logging():

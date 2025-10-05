@@ -12,9 +12,9 @@ from pathlib import Path
 # Добавляем корневую директорию в путь
 sys.path.append(str(Path(__file__).parent))
 
-from src.core.database import get_async_session
-from src.core.models import Source, SourceKind
-from src.services.html_parser.html_parser_service import HTMLParserService
+from Parser.src.core.database import get_async_session
+from Parser.src.core.models import Source, SourceKind
+from Parser.src.services.html_parser.html_parser_service import HTMLParserService
 
 # Настройка логирования
 logging.basicConfig(

@@ -69,7 +69,7 @@ import asyncio
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path('.')))
-from src.core.database import init_db, close_db
+from Parser.src.core.database import init_db, close_db
 async def check_db():
     await init_db()
     print('Database connection: OK')

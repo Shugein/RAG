@@ -193,7 +193,7 @@ Run these diagnostic commands:
 python scripts/verify_telegram_sources.py
 
 # Check database content
-python -c "import asyncio; from src.core.database import get_db_session, init_db; from src.core.models import News; from sqlalchemy import select; from sqlalchemy.orm import selectinload; async def check(): await init_db(); async with get_db_session() as s: r = await s.execute(select(News).options(selectinload(News.source)).limit(3).order_by(News.detected_at.desc())); news = r.scalars().all(); print(f'\nTotal news: {len(news)}\n'); [print(f'- {n.title[:100]}\n  Source: {n.source.code}\n') for n in news]; asyncio.run(check())"
+python -c "import asyncio; from Parser.src.core.database import get_db_session, init_db; from Parser.src.core.models import News; from sqlalchemy import select; from sqlalchemy.orm import selectinload; async def check(): await init_db(); async with get_db_session() as s: r = await s.execute(select(News).options(selectinload(News.source)).limit(3).order_by(News.detected_at.desc())); news = r.scalars().all(); print(f'\nTotal news: {len(news)}\n'); [print(f'- {n.title[:100]}\n  Source: {n.source.code}\n') for n in news]; asyncio.run(check())"
 
 # Check for encoding issues
 python scripts/fix_encoding.py --dry-run --limit 100

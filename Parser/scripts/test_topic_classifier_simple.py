@@ -12,9 +12,9 @@ from datetime import datetime
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.services.enricher.sector_mapper import SectorMapper, SectorTaxonomy
-from src.services.enricher.topic_classifier import ClassificationResult
-from src.graph_models import News, Company, NewsType, NewsSubtype
+from Parser.src.services.enricher.sector_mapper import SectorMapper, SectorTaxonomy
+from Parser.src.services.enricher.topic_classifier import ClassificationResult
+from Parser.src.graph_models import News, Company, NewsType, NewsSubtype
 
 
 def test_sector_mapper():
@@ -172,7 +172,7 @@ def test_country_extraction():
     print("=" * 60)
     
     # Импортируем TopicClassifier для тестирования методов
-    from src.services.enricher.topic_classifier import TopicClassifier
+    from Parser.src.services.enricher.topic_classifier import TopicClassifier
     
     classifier = TopicClassifier()
     
@@ -196,7 +196,7 @@ def test_news_type_classification():
     print("ТЕСТ 6: Классификация типов новостей")
     print("=" * 60)
     
-    from src.services.enricher.topic_classifier import TopicClassifier
+    from Parser.src.services.enricher.topic_classifier import TopicClassifier
     
     classifier = TopicClassifier()
     

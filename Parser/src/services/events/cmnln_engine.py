@@ -1,4 +1,4 @@
-# src/services/events/cmnln_engine.py
+#Parser.src/services/events/cmnln_engine.py
 """
 CMNLN Engine - Causal Mining of News & Links Networks
 Определение причинно-следственных связей с использованием domain priors из ТЗ
@@ -9,10 +9,10 @@ from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from src.core.models import Event
-from src.graph_models import GraphService, EventNode, CausesRelation
-from src.services.events.enhanced_evidence_engine import EnhancedEvidenceEngine
-from src.services.events.causal_chains_engine import CausalChainsEngine, ChainDirection
+from Parser.src.core.models import Event
+from Parser.src.graph_models import GraphService, EventNode, CausesRelation
+from Parser.src.services.events.enhanced_evidence_engine import EnhancedEvidenceEngine
+from Parser.src.services.events.causal_chains_engine import CausalChainsEngine, ChainDirection
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)

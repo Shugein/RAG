@@ -10,10 +10,10 @@ from pathlib import Path
 # Добавляем корневую директорию проекта в путь
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.core.database import init_db, close_db, get_db_session
-from src.core.models import Source
-from src.services.html_parser.forbes_parser import ForbesParser
-from src.services.html_parser.interfax_parser import InterfaxParser
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.core.models import Source
+from Parser.src.services.html_parser.forbes_parser import ForbesParser
+from Parser.src.services.html_parser.interfax_parser import InterfaxParser
 from sqlalchemy import select
 
 
@@ -128,7 +128,7 @@ async def test_parser_service():
     print("🔍 Testing HTML parser service...")
     
     try:
-        from src.services.html_parser.html_parser_service import HTMLParserService
+        from Parser.src.services.html_parser.html_parser_service import HTMLParserService
         
         await init_db()
         

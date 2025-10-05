@@ -16,7 +16,7 @@ switch ($Service.ToLower()) {
         docker logs --tail $Lines news-api
     }
     "telegram" {
-        Write-Host "=== Telegram Parser Logs ===" -ForegroundColor Cyan
+        Write-Host "=== Telegram_Parser Logs ===" -ForegroundColor Cyan
         docker logs --tail $Lines news-telegram-parser
     }
     "outbox" {

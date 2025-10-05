@@ -10,11 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, desc
 from sqlalchemy.orm import selectinload
 
-from src.core.models import News, Event, EventImportance, TriggeredWatch, EventPrediction
-from src.core.database import get_session as get_db_session
-from src.services.events.ceg_realtime_service import CEGRealtimeService
-from src.services.events.event_extractor import EventExtractor
-from src.graph_models import GraphService, EventNode
+from Parser.src.core.models import News, Event, EventImportance, TriggeredWatch, EventPrediction
+from Parser.src.core.database import get_session as get_db_session
+from Parser.src.services.events.ceg_realtime_service import CEGRealtimeService
+from Parser.src.services.events.event_extractor import EventExtractor
+from Parser.src.graph_models import GraphService, EventNode
 
 logger = logging.getLogger(__name__)
 

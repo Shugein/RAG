@@ -232,7 +232,7 @@ pip install transformers torch accelerate
 
 ```
 Hakaton/
-├── src/                    # Исходный код
+├──Parser.src/                    # Исходный код
 │   ├── api/               # REST API
 │   ├── core/              # Основные компоненты
 │   ├── services/          # Бизнес-логика

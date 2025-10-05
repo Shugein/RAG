@@ -1,4 +1,4 @@
-# src/services/html_parser/edisclosure_messages_parser.py
+#Parser.src/services/html_parser/edisclosure_messages_parser.py
 """
 Парсер для сообщений E-disclosure.ru, интегрированный в систему
 """
@@ -13,8 +13,8 @@ import requests
 from bs4 import BeautifulSoup
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models import Source
-from src.services.enricher.enrichment_service import EnrichmentService
+from Parser.src.core.models import Source
+from Parser.src.services.enricher.enrichment_service import EnrichmentService
 from .base_html_parser import BaseHTMLParser
 
 logger = logging.getLogger(__name__)

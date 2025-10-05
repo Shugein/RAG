@@ -1,4 +1,4 @@
-# src/radar/services/market_data_service.py
+#Parser.src/radar/services/market_data_service.py
 """
 Сервис для получения рыночных данных из различных источников
 Согласно Project Charter: MOEX (ALGOPACK), Yahoo Finance, Crypto
@@ -19,7 +19,7 @@ import numpy as np
 from redis import asyncio as aioredis
 import ccxt.async_support as ccxt
 
-from src.core.config import settings
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +118,8 @@ class MarketDataService:
             headers={
                 "Authorization": f"Bearer {settings.ALGOPACK_API_KEY}",
                 "User-Agent": "RADAR-AI/1.0"
-            }
+            },
+            trust_env=False  # Ignore environment proxy settings
         )
         
         # Crypto exchange (Binance as default)

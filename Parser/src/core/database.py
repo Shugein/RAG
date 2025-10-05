@@ -1,4 +1,4 @@
-# src/core/database.py
+#Parser.src/core/database.py
 """
 Модуль управления подключениями к базе данных.
 Использует SQLAlchemy 2.0 с async/await поддержкой.
@@ -18,7 +18,7 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.pool import NullPool, QueuePool
 from sqlalchemy import event, pool, text
 
-from src.core.config import settings
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -263,7 +263,7 @@ async def create_tables():
     
     async with engine.begin() as conn:
         # Импортируем все модели, чтобы они зарегистрировались
-        from src.core.models import (
+        from Parser.src.core.models import (
             Source, News, Image, Entity, LinkedCompany,
             Topic, SectorConstituent, CompanyAlias, 
             OutboxEvent, ParserState

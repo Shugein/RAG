@@ -1,4 +1,4 @@
-# src/utils/text_utils.py
+#Parser.src/utils/text_utils.py
 """
 Утилиты для работы с текстом
 """

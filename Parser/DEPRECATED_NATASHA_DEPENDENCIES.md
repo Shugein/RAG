@@ -153,10 +153,10 @@ LOCAL_AI_MODEL_PATH=/path/to/qwen3-4b
 ### Этап 3: Остальные файлы (К СДЕЛАНИЮ)
 ```bash
 # Найти все файлы с импортами Natasha:
-grep -r "from natasha" src/
-grep -r "import natasha" src/
-grep -r "doc\.tag_ner" src/
-grep -r "doc\.tag_morph" src/
+grep -r "from natasha"Parser.src/
+grep -r "import natasha"Parser.src/
+grep -r "doc\.tag_ner"Parser.src/
+grep -r "doc\.tag_morph"Parser.src/
 
 # Заменить на:
 from entity_recognition import CachedFinanceNERExtractor, CompatibilityWrapper

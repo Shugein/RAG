@@ -1,4 +1,4 @@
-# src/services/covariance_service.py
+#Parser.src/services/covariance_service.py
 """
 Сервис для расчета корреляций между компаниями
 Реализует логику COVARIATES_WITH связей из Project Charter
@@ -17,8 +17,8 @@ except ImportError:
     pd = None
 from dataclasses import dataclass
 
-from src.core.config import settings
-from src.graph_models import GraphService
+from Parser.src.core.config import settings
+from Parser.src.graph_models import GraphService
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class CovarianceService:
         
         # Инициализируем market data service для получения исторических данных
         try:
-            from src.services.market_data_service import MarketDataService
+            from Parser.src.services.market_data_service import MarketDataService
             self.market_data_service = MarketDataService()
             await self.market_data_service.initialize()
         except ImportError:

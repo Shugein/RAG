@@ -19,8 +19,8 @@ from typing import Dict, List, Any, Optional
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.config import settings
-from src.graph_models import GraphService
+from Parser.src.core.config import settings
+from Parser.src.graph_models import GraphService
 
 
 class Neo4jDumpImporter:

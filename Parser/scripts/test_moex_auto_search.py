@@ -11,9 +11,9 @@ from pathlib import Path
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.services.enricher.moex_auto_search import MOEXAutoSearch
-from src.services.enricher.company_aliases import get_alias_manager
-from src.services.enricher.ner_extractor import NERExtractor
+from Parser.src.services.enricher.moex_auto_search import MOEXAutoSearch
+from Parser.src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.ner_extractor import NERExtractor
 
 
 async def test_direct_search():

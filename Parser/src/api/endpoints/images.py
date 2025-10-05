@@ -1,4 +1,4 @@
-# src/api/endpoints/images.py
+#Parser.src/api/endpoints/images.py
 
 from uuid import UUID
 from fastapi import APIRouter, Depends, Path, HTTPException
@@ -6,8 +6,8 @@ from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from src.core.database import get_db
-from src.core.models import Image
+from Parser.src.core.database import get_db
+from Parser.src.core.models import Image
 
 router = APIRouter()
 

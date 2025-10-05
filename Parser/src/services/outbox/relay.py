@@ -1,4 +1,4 @@
-# src/services/outbox/relay.py
+#Parser.src/services/outbox/relay.py
 """
 Outbox Relay Service - реализация Transactional Outbox паттерна
 Читает события из outbox таблицы и публикует их в RabbitMQ
@@ -13,10 +13,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_
 from sqlalchemy.orm import selectinload
 
-from src.core.models import OutboxEvent
-from src.core.database import get_db_session
-from src.services.outbox.publisher import RabbitMQPublisher
-from src.core.config import settings
+from Parser.src.core.models import OutboxEvent
+from Parser.src.core.database import get_db_session
+from Parser.src.services.outbox.publisher import RabbitMQPublisher
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 

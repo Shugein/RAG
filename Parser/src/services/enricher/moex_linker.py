@@ -1,4 +1,4 @@
-# src/radar/services/moex_linker.py
+#Parser.src/radar/services/moex_linker.py
 """
 Сервис связывания текстовых упоминаний компаний с инструментами MOEX
 Использует ALGOPACK API, fuzzy matching и алиасы
@@ -20,10 +20,10 @@ from fuzzywuzzy import fuzz, process
 import pymorphy3
 from redis import asyncio as aioredis
 
-from src.core.config import settings
-from src.graph_models import Company, Instrument, GraphService
-from src.services.enricher.company_aliases import get_alias_manager
-from src.services.enricher.moex_auto_search import MOEXAutoSearch
+from Parser.src.core.config import settings
+from Parser.src.graph_models import Company, Instrument, GraphService
+from Parser.src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.moex_auto_search import MOEXAutoSearch
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +110,8 @@ class MOEXLinker:
             headers={
                 "Authorization": f"Bearer {settings.ALGOPACK_API_KEY}",
                 "User-Agent": "RADAR-AI-MOEXLinker/1.0"
-            }
+            },
+            trust_env=False  # Ignore environment proxy settings
         )
         
         # Redis для кеширования
@@ -927,7 +928,7 @@ class MOEXEnrichmentProcessor:
         await self.linker.initialize()
         
         # Инициализируем граф
-        from src.radar.core.graph_models import GraphService
+        from Parser.src.radar.core.graph_models import GraphService
         self.graph = GraphService(
             uri=settings.NEO4J_URI,
             user=settings.NEO4J_USER,
@@ -935,7 +936,7 @@ class MOEXEnrichmentProcessor:
         )
         
         # Инициализируем market data service
-        from src.radar.services.market_data_service import MarketDataService
+        from Parser.src.radar.services.market_data_service import MarketDataService
         self.market_data = MarketDataService()
         await self.market_data.initialize()
         

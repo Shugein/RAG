@@ -161,7 +161,7 @@ print(f"Скорость: {len(results)/elapsed:.1f} новостей/сек")
 
 ### Замена старого NER
 ```python
-# В src/services/enricher/enrichment_service.py
+# ВParser.src/services/enricher/enrichment_service.py
 from entity_recognition import CachedFinanceNERExtractor
 
 class EnrichmentService:

@@ -7,8 +7,8 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
 
-from src.core.models import Event, News, Entity, EventImportance
-from src.graph_models import GraphService
+from Parser.src.core.models import Event, News, Entity, EventImportance
+from Parser.src.graph_models import GraphService
 
 logger = logging.getLogger(__name__)
 

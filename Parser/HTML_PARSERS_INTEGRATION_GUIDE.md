@@ -239,8 +239,8 @@ tail -f logs/html_parser.log
 # Проверка состояния источников в БД
 python -c "
 import asyncio
-from src.core.database import init_db, close_db, get_db_session
-from src.core.models import Source
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.core.models import Source
 from sqlalchemy import select
 
 async def check_sources():

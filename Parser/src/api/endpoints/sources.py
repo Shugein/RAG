@@ -1,4 +1,4 @@
-# src/api/endpoints/sources.py
+#Parser.src/api/endpoints/sources.py
 """
 Sources endpoints
 """
@@ -10,9 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from src.core.database import get_db
-from src.core.models import Source
-from src.api.schemas import SourceResponse
+from Parser.src.core.database import get_db
+from Parser.src.core.models import Source
+from Parser.src.api.schemas import SourceResponse
 
 router = APIRouter()
 

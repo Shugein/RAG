@@ -1,4 +1,4 @@
-# src/services/events/watchers.py
+#Parser.src/services/events/watchers.py
 """
 Watchers System - система мониторинга событий на трех уровнях:
 L0: Базовые события (reactive monitoring)
@@ -14,9 +14,9 @@ from dataclasses import dataclass
 from enum import Enum
 import asyncio
 
-from src.core.models import Event
-from src.graph_models import GraphService
-from src.services.events.importance_calculator import ImportanceScoreCalculator
+from Parser.src.core.models import Event
+from Parser.src.graph_models import GraphService
+from Parser.src.services.events.importance_calculator import ImportanceScoreCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -39,35 +39,49 @@ class WatchStatus(Enum):
 @dataclass
 class WatchCondition:
     """Условие срабатывания watcher'а"""
-    event_types: List[str]
-    companies: List[str]
-    sectors: List[str]
+    event_types: List[str] = None
+    companies: List[str] = None
+    sectors: List[str] = None
     importance_threshold: float = 0.5
     burst_threshold: int = 3
     time_window_hours: int = 24
+
+    def __post_init__(self):
+        """Инициализация значений по умолчанию"""
+        if self.event_types is None:
+            self.event_types = []
+        if self.companies is None:
+            self.companies = []
+        if self.sectors is None:
+            self.sectors = []
     
     def matches(self, event: Event, importance_score: float, burst_count: int) -> bool:
         """Проверить соответствие события условию"""
-        
+
         # Проверка типа события
         if self.event_types and event.event_type not in self.event_types:
             return False
-        
+
         # Проверка компаний
         event_companies = event.attrs.get("companies", [])
         event_tickers = event.attrs.get("tickers", [])
         event_entities = set(event_companies + event_tickers)
-        
+
         if self.companies and not event_entities.intersection(set(self.companies)):
             return False
-        
+
+        # Проверка секторов
+        event_sectors = event.attrs.get("sectors", [])
+        if self.sectors and not set(event_sectors).intersection(set(self.sectors)):
+            return False
+
         # Проверка важности и burst
         if importance_score < self.importance_threshold:
             return False
-            
+
         if burst_count < self.burst_threshold:
             return False
-        
+
         return True
 
 
@@ -81,10 +95,18 @@ class WatchRule:
     description: str
     alerts: List[str] = None  # Список контактов для уведомлений
     auto_expire_hours: int = 168  # 7 дней по умолчанию
-    
+    # L1 Pattern-specific fields
+    pattern_type: Optional[str] = None
+    follow_days: Optional[int] = None
+    # L2 Predictive-specific fields
+    prediction_window_days: Optional[int] = None
+    prediction_types: Optional[List[str]] = None
+
     def __post_init__(self):
         if self.alerts is None:
             self.alerts = []
+        if self.prediction_types is None:
+            self.prediction_types = []
 
 
 class TriggeredWatch:
@@ -152,28 +174,23 @@ class L0BasicWatcher(BaseWatcher):
                 level=WatchLevel.L0_BASIC,
                 condition=WatchCondition(
                     event_types=["sanctions"],
-                    companies=[],
                     sectors=["banks", "energy", "defense"],
                     importance_threshold=0.8,
                     burst_threshold=2
                 ),
-                description="Новые санкции против банковского/энергетического/оборонного секторов",
-                priority="high"
+                description="Новые санкции против банковского/энергетического/оборонного секторов"
             ),
-            
+
             WatchRule(
                 id="default_events",
                 name="Дефолты компаний",
                 level=WatchLevel.L0_BASIC,
                 condition=WatchCondition(
                     event_types=["default", "bankruptcy"],
-                    companies=[],
-                    sectors=[],
                     importance_threshold=0.9,
                     burst_threshold=1
                 ),
                 description="Объявления о дефолтах или банкротствах",
-                priority="critical"
             ),
             
             # Финансовые события
@@ -181,7 +198,7 @@ class L0BasicWatcher(BaseWatcher):
                 id="central_bank_rates",
                 name="Политика ЦБ",
                 level=WatchLevel.L0_BASIC,
-                condition=WatchRule(
+                condition=WatchCondition(
                     event_types=["rate_hike", "rate_cut"],
                     companies=["ЦБ РФ", "Bank of Russia"],
                     sectors=["monetary"],
@@ -189,7 +206,6 @@ class L0BasicWatcher(BaseWatcher):
                     burst_threshold=1
                 ),
                 description="Изменения ключевой ставки ЦБ РФ",
-                priority="high"
             ),
             
             # Earnings сюрпризы
@@ -199,15 +215,13 @@ class L0BasicWatcher(BaseWatcher):
                 level=WatchLevel.L0_BASIC,
                 condition=WatchCondition(
                     event_types=["earnings_miss", "earnings_beat"],
-                    companies=[],  # Любые крупные компании
                     sectors=["banks", "oil_gas", "metals", "telecom"],
                     importance_threshold=0.6,
                     burst_threshold=3
                 ),
                 description="Значительные отклонения от прогнозов earnings",
-                priority="medium"
             ),
-            
+
             # M&A активности
             WatchRule(
                 id="large_ma_deals",
@@ -215,15 +229,13 @@ class L0BasicWatcher(BaseWatcher):
                 level=WatchLevel.L0_BASIC,
                 condition=WatchCondition(
                     event_types=["m&a", "acquisition", "merger"],
-                    companies=[],
                     sectors=["finance", "energy", "metals"],
                     importance_threshold=0.8,
                     burst_threshold=2
                 ),
                 description="Крупные сделки слияний и поглощений",
-                priority="medium"
             ),
-            
+
             # IPO события
             WatchRule(
                 id="major_ipo_events",
@@ -231,15 +243,13 @@ class L0BasicWatcher(BaseWatcher):
                 level=WatchLevel.L0_BASIC,
                 condition=WatchCondition(
                     event_types=["ipo", "public_offering"],
-                    companies=[],
                     sectors=["technology", "finance", "energy"],
                     importance_threshold=0.7,
                     burst_threshold=1
                 ),
                 description="Крупные первичные размещения акций",
-                priority="medium"
             ),
-            
+
             # Аварии и инциденты
             WatchRule(
                 id="major_accidents",
@@ -247,13 +257,11 @@ class L0BasicWatcher(BaseWatcher):
                 level=WatchLevel.L0_BASIC,
                 condition=WatchCondition(
                     event_types=["accident", "incident", "disaster"],
-                    companies=[],
                     sectors=["transport", "energy", "mining"],
                     importance_threshold=0.9,
                     burst_threshold=1
                 ),
                 description="Серьезные аварии в стратегически важных секторах",
-                priority="high"
             ),
             
             # Макроэкономические события
@@ -269,7 +277,6 @@ class L0BasicWatcher(BaseWatcher):
                     burst_threshold=2
                 ),
                 description="Важные изменения в государственной политике",
-                priority="high"
             )
         ]
     
@@ -387,8 +394,7 @@ class L1PatternWatcher(BaseWatcher):
                 name="Паттерн санкции→рынок",
                 level=WatchLevel.L1_PATTERN,
                 condition=WatchCondition(
-                    event_types=["sanctions"],  # Инициатор
-                    companies=[],
+                    event_types=["sanctions"],
                     importance_threshold=0.7
                 ),
                 description="Санкции с последующим анализом рыночной реакции",

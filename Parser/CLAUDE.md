@@ -10,7 +10,7 @@ This is a **Financial News Aggregator** system that collects, enriches, and publ
 
 The system follows a **multi-service microservices architecture** with transactional outbox pattern for reliable event publishing:
 
-1. **Telegram Parser Service** ([src/services/telegram_parser/](src/services/telegram_parser/))
+1. **Telegram_Parser Service** ([src/services/telegram_parser/](src/services/telegram_parser/))
    - Connects to Telegram via Telethon
    - Parses messages from configured channels in [config/sources.yml](config/sources.yml)
    - Applies multi-level anti-spam filtering using rules from [config/ad_rules.yml](config/ad_rules.yml)
@@ -262,7 +262,7 @@ python scripts/load_sources.py  # Load news sources from config/sources.yml
 
 **Start services manually:**
 ```bash
-# Telegram Parser
+# Telegram_Parser
 python scripts/start_telegram_parser.py
 
 # Enricher Service
@@ -274,7 +274,7 @@ python scripts/start_outbox_relay.py
 # REST API
 python scripts/start_api.py
 # Or with uvicorn:
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+uvicornParser.src.api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### Access Services

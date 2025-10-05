@@ -10,8 +10,8 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 # Импортируйте модели и настройки:
-from src.core.models import Base
-from src.core.config import settings
+from Parser.src.core.models import Base
+from Parser.src.core.config import settings
 
 # Установите target_metadata:
 target_metadata = Base.metadata

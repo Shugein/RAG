@@ -1,4 +1,4 @@
-# src/services/enricher/company_aliases.py
+#Parser.src/services/enricher/company_aliases.py
 """
 Централизованный модуль для управления алиасами компаний MOEX
 Используется в moex_linker и topic_classifier для избежания дублирования

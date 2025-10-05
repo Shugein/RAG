@@ -1,4 +1,4 @@
-# src/services/html_parser/__init__.py
+#Parser.src/services/html_parser/__init__.py
 """
 HTML парсеры для различных новостных источников
 """

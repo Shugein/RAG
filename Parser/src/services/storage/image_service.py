@@ -1,4 +1,4 @@
-# src/services/storage/image_service.py
+#Parser.src/services/storage/image_service.py
 """
 Сервис для работы с изображениями
 """
@@ -13,8 +13,8 @@ from PIL import Image as PILImage
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from src.core.models import Image
-from src.core.config import settings
+from Parser.src.core.models import Image
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 

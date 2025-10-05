@@ -26,7 +26,7 @@
 # print(hits[0].page_content)
 
 
-# from src.data import downloader_functions as d_f
+# from Parser.src.data import downloader_functions as d_f
 import tqdm
 
 import torch

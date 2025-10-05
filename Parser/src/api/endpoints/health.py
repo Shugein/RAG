@@ -1,4 +1,4 @@
-# src/api/endpoints/health.py
+#Parser.src/api/endpoints/health.py
 """
 Health check endpoints
 """
@@ -7,11 +7,11 @@ from datetime import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.database import get_db, check_connection
-from src.api.schemas import HealthResponse
+from Parser.src.core.database import get_db, check_connection
+from Parser.src.api.schemas import HealthResponse
 import aio_pika
 import redis.asyncio as redis
-from src.core.config import settings
+from Parser.src.core.config import settings
 
 router = APIRouter()
 

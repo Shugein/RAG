@@ -1,4 +1,4 @@
-# src/api/endpoints/jobs.py
+#Parser.src/api/endpoints/jobs.py
 """
 Background jobs endpoints
 """
@@ -13,13 +13,13 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from src.core.database import get_db, get_db_session
-from src.core.config import settings
-from src.core.models import Source, ParserState
-from src.api.schemas import BackfillRequest, JobResponse
-from src.services.telegram_parser.client import TelegramClientManager
-from src.services.telegram_parser.parser import TelegramParser
-from src.services.telegram_parser.antispam import AntiSpamFilter
+from Parser.src.core.database import get_db, get_db_session
+from Parser.src.core.config import settings
+from Parser.src.core.models import Source, ParserState
+from Parser.src.api.schemas import BackfillRequest, JobResponse
+from Parser.src.services.telegram_parser.client import TelegramClientManager
+from Parser.src.services.telegram_parser.parser import Telegram_Parser
+from Parser.src.services.telegram_parser.antispam import AntiSpamFilter
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ async def run_backfill(
                     logger.info(f"Processing source {source_code} (job {job_id})")
                     
                     # Create parser for this source
-                    parser = TelegramParser(
+                    parser = Telegram_Parser(
                         client=client,
                         db_session=session,
                         anti_spam=anti_spam
@@ -182,7 +182,7 @@ async def _get_or_create_parser_state(session: AsyncSession, source: Source) -> 
 
 
 async def _parse_with_custom_days(
-    parser: TelegramParser,
+    parser: Telegram_Parser,
     source: Source,
     days_back: int,
     limit: Optional[int]

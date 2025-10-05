@@ -1,4 +1,4 @@
-# src/api/endpoints/importance.py
+#Parser.src/api/endpoints/importance.py
 """
 API endpoints for Event Importance Score
 """
@@ -13,9 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func, desc
 from sqlalchemy.orm import selectinload
 
-from src.core.database import get_db_session
-from src.core.models import Event, EventImportance, News
-from src.api.schemas import EventImportanceResponse, EventImportanceSummaryResponse
+from Parser.src.core.database import get_db_session
+from Parser.src.core.models import Event, EventImportance, News
+from Parser.src.api.schemas import EventImportanceResponse, EventImportanceSummaryResponse
 
 logger = logging.getLogger(__name__)
 

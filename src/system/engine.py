@@ -18,6 +18,7 @@ from src.system.LLM_final.main import (
     Forecast,
     DraftResponse
 )
+from src.system.LLM_final.output import save_article_pdf
 from src.system.entity_recognition import ExtractedEntities
 
 # Настройка логирования
@@ -60,7 +61,7 @@ class RAGPipeline:
         rerank_limit: int = 3,
         use_parent_docs: bool = True,
         hotness_weight: float = 0.3,
-        alpha: float = 0.5
+        alpha: float = 0.6
     ) -> List[Dict[str, Any]]:
         """
         Поиск релевантных документов с реренкингом
@@ -211,6 +212,35 @@ class RAGPipeline:
 
         return draft
 
+    def generate_pdf(
+        self,
+        draft: DraftResponse,
+        output_path: str = "article.pdf"
+    ) -> str:
+        """
+        Генерация PDF из DraftResponse
+
+        Args:
+            draft: DraftResponse объект с готовой статьей
+            output_path: Путь для сохранения PDF
+
+        Returns:
+            Путь к сохраненному PDF файлу
+        """
+        logger.info(f"Generating PDF: {output_path}")
+        start_time = time.time()
+
+        # Конвертируем DraftResponse в dict для save_article_pdf
+        draft_dict = draft.model_dump(by_alias=True)
+
+        # Генерируем PDF
+        pdf_path = save_article_pdf(draft_dict, output_path)
+
+        gen_time = time.time() - start_time
+        logger.info(f"PDF generated in {gen_time:.2f}s at {pdf_path}")
+
+        return pdf_path
+
     def query(
         self,
         user_query: str,
@@ -219,10 +249,12 @@ class RAGPipeline:
         use_parent_docs: bool = True,
         news_type: str = "industry_trend",
         tone: str = "explanatory",
-        desired_outputs: List[str] = None
+        desired_outputs: List[str] = None,
+        generate_pdf: bool = False,
+        pdf_path: str = "article.pdf"
     ) -> Dict[str, Any]:
         """
-        Полный RAG пайплайн: поиск + генерация статьи
+        Полный RAG пайплайн: поиск + генерация статьи + опциональный PDF
 
         Args:
             user_query: Вопрос/тема пользователя
@@ -232,9 +264,11 @@ class RAGPipeline:
             news_type: Тип новости для генерации
             tone: Тональность статьи
             desired_outputs: Форматы вывода
+            generate_pdf: Генерировать PDF файл
+            pdf_path: Путь для сохранения PDF
 
         Returns:
-            Dict с статьей и метаданными
+            Dict с статьей, метаданными и опциональным путем к PDF
         """
         logger.info(f"Processing query: '{user_query}' (parent_docs: {use_parent_docs})")
         pipeline_start = time.time()
@@ -274,6 +308,11 @@ class RAGPipeline:
             }
         }
 
+        # Генерация PDF если запрошена
+        if generate_pdf:
+            pdf_file_path = self.generate_pdf(draft, pdf_path)
+            result['pdf_path'] = pdf_file_path
+
         logger.info(f"Pipeline completed in {pipeline_time:.2f}s")
         return result
 
@@ -301,7 +340,7 @@ if __name__ == "__main__":
         print(f"{'='*80}")
         print(f"\nQuery: {test_query}\n")
 
-        # Выполнение запроса
+        # Выполнение запроса с генерацией PDF
         result = rag.query(
             user_query=test_query,
             search_limit=10,
@@ -309,7 +348,9 @@ if __name__ == "__main__":
             use_parent_docs=True,
             news_type="industry_trend",
             tone="explanatory",
-            desired_outputs=["social_post", "article_draft", "alert"]
+            desired_outputs=["social_post", "article_draft", "alert"],
+            generate_pdf=False,
+            pdf_path="sberbank_article.pdf"
         )
 
         # Вывод результатов
@@ -349,6 +390,13 @@ if __name__ == "__main__":
         print(f"{'='*80}")
         for key, value in result['metadata'].items():
             print(f"   {key}: {value}")
+
+        # PDF
+        if 'pdf_path' in result:
+            print(f"\n{'='*80}")
+            print(f"PDF GENERATED:")
+            print(f"{'='*80}")
+            print(f"   Path: {result['pdf_path']}")
 
     finally:
         rag.close()

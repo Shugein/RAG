@@ -11,11 +11,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.config import settings
-from src.core.database import init_db, close_db, get_db_session
-from src.services.enricher.enrichment_service import EnrichmentService
-from src.utils.logging import setup_logging
-from src.core.models import News, Entity, LinkedCompany, Topic
+from Parser.src.core.config import settings
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.services.enricher.enrichment_service import EnrichmentService
+from Parser.src.utils.logging import setup_logging
+from Parser.src.core.models import News, Entity, LinkedCompany, Topic
 from sqlalchemy import select, and_
 
 logger = logging.getLogger(__name__)

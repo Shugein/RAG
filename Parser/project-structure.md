@@ -11,7 +11,7 @@ news-aggregator/
 ├── config/
 │   ├── sources.yml
 │   └── ad_rules.yml
-├── src/
+├──Parser.src/
 │   ├── __init__.py
 │   ├── core/
 │   │   ├── __init__.py
@@ -71,7 +71,7 @@ news-aggregator/
 - **models.py** - ORM модели для всех таблиц
 - **schemas.py** - Pydantic модели для валидации
 
-### Telegram Parser Service
+### Telegram_Parser Service
 - **client.py** - инициализация Telethon клиента
 - **parser.py** - основная логика парсинга сообщений
 - **antispam.py** - многоуровневая фильтрация рекламы

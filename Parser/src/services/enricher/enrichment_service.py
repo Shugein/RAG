@@ -1,4 +1,4 @@
-# src/services/enricher/enrichment_service.py
+#Parser.src/services/enricher/enrichment_service.py
 """
 Сервис обогащения новостей с AI-based NER extraction
 """
@@ -12,18 +12,18 @@ from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models import News, Entity, LinkedCompany, Topic
+from Parser.src.core.models import News, Entity, LinkedCompany, Topic
 # Заменяем старый NER на AI extraction
-# from src.services.enricher.ner_extractor import NERExtractor
+# from Parser.src.services.enricher.ner_extractor import NERExtractor
 from entity_recognition import CachedFinanceNERExtractor  # GPT-5 API
 from entity_recognition_local import LocalFinanceNERExtractor  # Qwen3-4B local
-from src.services.enricher.moex_linker import MOEXLinker
-from src.services.enricher.topic_classifier import TopicClassifier
-from src.services.outbox.publisher import EventPublisher
-from src.services.impact_calculator import ImpactCalculator
-from src.services.covariance_service import CovarianceService
-from src.services.events.ceg_realtime_service import CEGRealtimeService
-from src.core.config import settings
+from Parser.src.services.enricher.moex_linker import MOEXLinker
+from Parser.src.services.enricher.topic_classifier import TopicClassifier
+from Parser.src.services.outbox.publisher import EventPublisher
+from Parser.src.services.impact_calculator import ImpactCalculator
+from Parser.src.services.covariance_service import CovarianceService
+from Parser.src.services.events.ceg_realtime_service import CEGRealtimeService
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -79,14 +79,14 @@ class EnrichmentService:
             await self.impact_calculator.initialize()
             await self.covariance_service.initialize()
 
-            # Инициализируем CEG service если есть graph
-            if self.topic_classifier.graph:
-                self.ceg_service = CEGRealtimeService(
-                    session=self.session,
-                    graph_service=self.topic_classifier.graph,
-                    lookback_window=30  # 30 дней для ретроспективного анализа
-                )
-                logger.info("CEG real-time service initialized")
+            # CEG real-time service отключен
+            # if self.topic_classifier.graph:
+            #     self.ceg_service = CEGRealtimeService(
+            #         session=self.session,
+            #         graph_service=self.topic_classifier.graph,
+            #         lookback_window=30  # 30 дней для ретроспективного анализа
+            #     )
+            #     logger.info("CEG real-time service initialized")
 
             self._initialized = True
     
@@ -492,7 +492,7 @@ class EnrichmentService:
     def _get_sector_for_ticker(self, ticker: str) -> Optional[str]:
         """Получить сектор по тикеру"""
         # Импортируем MOEXSectorMapper из moex_linker
-        from src.services.enricher.moex_linker import MOEXSectorMapper
+        from Parser.src.services.enricher.moex_linker import MOEXSectorMapper
         return MOEXSectorMapper.get_sector(ticker)
     
     def _get_sector_name(self, sector_key: str) -> str:
@@ -758,6 +758,8 @@ class EnrichmentService:
         if self._initialized:
             if self.moex_linker:
                 await self.moex_linker.close()
+            if self.topic_classifier:
+                await self.topic_classifier.close()
             if self.impact_calculator:
                 await self.impact_calculator.close()
             if self.covariance_service:

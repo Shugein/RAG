@@ -25,7 +25,7 @@
 
 **Пример использования:**
 ```python
-from src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.company_aliases import get_alias_manager
 
 manager = get_alias_manager()
 ticker = manager.get_ticker("сбербанк")  # "SBER"
@@ -49,7 +49,7 @@ https://iss.moex.com/iss/securities.json?q=<query>
 
 **Пример использования:**
 ```python
-from src.services.enricher.moex_auto_search import MOEXAutoSearch
+from Parser.src.services.enricher.moex_auto_search import MOEXAutoSearch
 
 searcher = MOEXAutoSearch()
 await searcher.initialize()
@@ -134,7 +134,7 @@ python scripts/test_moex_auto_search.py
 
 ```python
 # Пример 1: Простой автопоиск
-from src.services.enricher.moex_auto_search import MOEXAutoSearch
+from Parser.src.services.enricher.moex_auto_search import MOEXAutoSearch
 
 searcher = MOEXAutoSearch()
 await searcher.initialize()
@@ -148,7 +148,7 @@ await searcher.close()
 
 ```python
 # Пример 2: Интеграция с существующим кодом
-from src.services.enricher.moex_linker import MOEXLinker
+from Parser.src.services.enricher.moex_linker import MOEXLinker
 
 linker = MOEXLinker(enable_auto_learning=True)
 await linker.initialize()

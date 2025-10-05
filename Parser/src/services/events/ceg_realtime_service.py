@@ -1,4 +1,4 @@
-# src/services/events/ceg_realtime_service.py
+#Parser.src/services/events/ceg_realtime_service.py
 """
 Real-time CEG Service - реактивный сервис для построения CEG в реальном времени
 
@@ -19,14 +19,14 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models import News, Event, EventImportance, TriggeredWatch, EventPrediction
-from src.graph_models import GraphService, EventNode, CausesRelation, ImpactsRelation
-from src.services.events.event_extractor import EventExtractor
-from src.services.events.cmnln_engine import CMLNEngine
-from src.services.events.importance_calculator import ImportanceScoreCalculator
-from src.services.events.watchers import WatchersSystem, WatchLevel
-from src.services.events.event_prediction import EventPredictionEngine
-from src.services.moex.moex_prices import MOEXPriceService, EventStudyAnalyzer
+from Parser.src.core.models import News, Event, EventImportance, TriggeredWatch, EventPrediction
+from Parser.src.graph_models import GraphService, EventNode, CausesRelation, ImpactsRelation
+from Parser.src.services.events.event_extractor import EventExtractor
+from Parser.src.services.events.cmnln_engine import CMLNEngine
+from Parser.src.services.events.importance_calculator import ImportanceScoreCalculator
+from Parser.src.services.events.watchers import WatchersSystem, WatchLevel
+from Parser.src.services.events.event_prediction import EventPredictionEngine
+from Parser.src.services.moex.moex_prices import MOEXPriceService, EventStudyAnalyzer
 
 logger = logging.getLogger(__name__)
 

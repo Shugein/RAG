@@ -10,9 +10,9 @@ from pathlib import Path
 # Добавляем корневую директорию проекта в путь
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.core.database import init_db, close_db, get_db_session
-from src.core.models import Source, SourceKind
-from src.services.html_parser.html_parser_service import HTMLParserService
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.core.models import Source, SourceKind
+from Parser.src.services.html_parser.html_parser_service import HTMLParserService
 from sqlalchemy import select
 
 
@@ -188,18 +188,18 @@ async def test_ceg_script_import():
         import sys
         sys.path.insert(0, str(Path("scripts")))
         
-        from start_telegram_parser_ceg import TelegramParserServiceCEG
+        from start_telegram_parser_ceg import Telegram_ParserServiceCEG
         
         print("   ✅ CEG script imports successfully")
         
         # Проверяем, что класс имеет новые методы
-        if hasattr(TelegramParserServiceCEG, '_monitor_html_source_batch'):
+        if hasattr(Telegram_ParserServiceCEG, '_monitor_html_source_batch'):
             print("   ✅ HTML monitoring method found")
         else:
             print("   ❌ HTML monitoring method not found")
             return False
         
-        if hasattr(TelegramParserServiceCEG, '_collect_html_news_batch'):
+        if hasattr(Telegram_ParserServiceCEG, '_collect_html_news_batch'):
             print("   ✅ HTML news collection method found")
         else:
             print("   ❌ HTML news collection method not found")

@@ -9,8 +9,8 @@ from enum import Enum
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from src.core.models import Event, EventImportance
-from src.graph_models import GraphService
+from Parser.src.core.models import Event, EventImportance
+from Parser.src.graph_models import GraphService
 
 logger = logging.getLogger(__name__)
 

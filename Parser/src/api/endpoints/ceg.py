@@ -1,4 +1,4 @@
-# src/api/endpoints/ceg.py
+#Parser.src/api/endpoints/ceg.py
 """
 CEG (Causal Event Graph) API endpoints
 """
@@ -12,10 +12,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
-from src.core.database import get_session
-from src.core.models import Event
-from src.graph_models import GraphService
-from src.core.config import settings
+from Parser.src.core.database import get_session
+from Parser.src.core.models import Event
+from Parser.src.graph_models import GraphService
+from Parser.src.core.config import settings
 
 router = APIRouter(prefix="/ceg", tags=["ceg"])
 
@@ -509,7 +509,7 @@ async def create_backfill_task(
     Создать задачу исторической загрузки событий
     """
     
-    from src.services.events.historical_backfill_service import HistoricalBackfillService
+    from Parser.src.services.events.historical_backfill_service import HistoricalBackfillService
     
     backfill_service = HistoricalBackfillService(session, ceg.graph)
     
@@ -538,7 +538,7 @@ async def get_backfill_task(
     Получить информацию о задаче исторической загрузки
     """
     
-    from src.services.events.historical_backfill_service import HistoricalBackfillService
+    from Parser.src.services.events.historical_backfill_service import HistoricalBackfillService
     
     backfill_service = HistoricalBackfillService(session, ceg.graph)
     task_info = backfill_service.get_task_by_id(task_id)
@@ -559,7 +559,7 @@ async def execute_backfill_task(
     Выполнить задачу исторической загрузки
     """
     
-    from src.services.events.historical_backfill_service import HistoricalBackfillService
+    from Parser.src.services.events.historical_backfill_service import HistoricalBackfillService
     
     backfill_service = HistoricalBackfillService(session, ceg.graph)
     
@@ -582,7 +582,7 @@ async def cancel_backfill_task(
     Отменить задачу исторической загрузки
     """
     
-    from src.services.events.historical_backfill_service import HistoricalBackfillService
+    from Parser.src.services.events.historical_backfill_service import HistoricalBackfillService
     
     backfill_service = HistoricalBackfillService(session, ceg.graph)
     
@@ -604,7 +604,7 @@ async def get_all_backfill_tasks(
     Получить список всех задач исторической загрузки
     """
     
-    from src.services.events.historical_backfill_service import HistoricalBackfillService
+    from Parser.src.services.events.historical_backfill_service import HistoricalBackfillService
     
     backfill_service = HistoricalBackfillService(session, ceg.graph)
     tasks = backfill_service.get_all_tasks(status)
@@ -621,7 +621,7 @@ async def get_backfill_statistics(
     Получить статистики сервиса исторической загрузки
     """
     
-    from src.services.events.historical_backfill_service import HistoricalBackfillService
+    from Parser.src.services.events.historical_backfill_service import HistoricalBackfillService
     
     backfill_service = HistoricalBackfillService(session, ceg.graph)
     stats = backfill_service.get_statistics()

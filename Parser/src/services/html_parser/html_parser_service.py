@@ -1,4 +1,4 @@
-# src/services/html_parser/html_parser_service.py
+#Parser.src/services/html_parser/html_parser_service.py
 """
 Сервис для управления HTML парсерами
 """
@@ -10,13 +10,13 @@ from typing import Dict, Any, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from src.core.models import Source, SourceKind
-from src.services.enricher.enrichment_service import EnrichmentService
-from src.services.html_parser.forbes_parser import ForbesParser
-from src.services.html_parser.interfax_parser import InterfaxParser
-from src.services.html_parser.edisclosure_parser import EDisclosureParser
-from src.services.html_parser.moex_parser import MOEXParser
-from src.services.html_parser.edisclosure_messages_parser import EDisclosureMessagesParser
+from Parser.src.core.models import Source, SourceKind
+from Parser.src.services.enricher.enrichment_service import EnrichmentService
+from Parser.src.services.html_parser.forbes_parser import ForbesParser
+from Parser.src.services.html_parser.interfax_parser import InterfaxParser
+from Parser.src.services.html_parser.edisclosure_parser import EDisclosureParser
+from Parser.src.services.html_parser.moex_parser import MOEXParser
+from Parser.src.services.html_parser.edisclosure_messages_parser import EDisclosureMessagesParser
 
 logger = logging.getLogger(__name__)
 

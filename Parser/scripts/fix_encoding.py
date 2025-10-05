@@ -15,14 +15,14 @@ import sys
 from pathlib import Path
 from typing import List
 
-# Add src to path
+# AddParser.src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.database import get_db_session, init_db
-from src.core.models import News
+from Parser.src.core.database import get_db_session, init_db
+from Parser.src.core.models import News
 
 logging.basicConfig(
     level=logging.INFO,

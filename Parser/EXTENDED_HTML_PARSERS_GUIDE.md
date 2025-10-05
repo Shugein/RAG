@@ -120,7 +120,7 @@ scripts/start_telegram_parser_ceg.py
 
 ```python
 # Тестируем конкретный парсер
-from src.services.html_parser.moex_parser import MOEXParser
+from Parser.src.services.html_parser.moex_parser import MOEXParser
 
 parser = MOEXParser(source, session)
 urls = await parser.get_article_urls(max_articles=10)

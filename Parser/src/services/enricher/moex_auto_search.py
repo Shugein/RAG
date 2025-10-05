@@ -1,4 +1,4 @@
-# src/services/enricher/moex_auto_search.py
+#Parser.src/services/enricher/moex_auto_search.py
 """
 Автоматический поиск инструментов на Московской бирже через ISS API
 https://iss.moex.com/iss/reference/
@@ -10,7 +10,7 @@ from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
 import httpx
 
-from src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.company_aliases import get_alias_manager
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,8 @@ class MOEXAutoSearch:
                 timeout=30.0,
                 headers={
                     "User-Agent": "RADAR-AI-MOEXAutoSearch/1.0"
-                }
+                },
+                trust_env=False  # Ignore environment proxy settings
             )
             logger.info("MOEXAutoSearch initialized")
     

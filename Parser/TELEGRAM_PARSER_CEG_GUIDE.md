@@ -1,8 +1,8 @@
-# Telegram Parser с CEG + AI - Руководство
+# Telegram_Parser с CEG + AI - Руководство
 
 ## Обзор
 
-Новый улучшенный Telegram Parser с интегрированной **AI extraction** и **CEG (Causal Event Graph)** построением в реальном времени.
+Новый улучшенный Telegram_Parser с интегрированной **AI extraction** и **CEG (Causal Event Graph)** построением в реальном времени.
 
 ## Новые возможности
 

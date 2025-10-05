@@ -1,4 +1,4 @@
-# src/services/outbox/publisher.py
+#Parser.src/services/outbox/publisher.py
 """
 Event Publisher для публикации событий в RabbitMQ
 Часть реализации Transactional Outbox паттерна
@@ -15,8 +15,8 @@ from sqlalchemy import select
 import aio_pika
 from aio_pika import Message, DeliveryMode, ExchangeType
 
-from src.core.models import News, OutboxEvent
-from src.core.config import settings
+from Parser.src.core.models import News, OutboxEvent
+from Parser.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 

@@ -12,8 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import uvicorn
-from src.core.config import settings
-from src.utils.logging import setup_logging
+from Parser.src.core.config import settings
+from Parser.src.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 

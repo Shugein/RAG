@@ -24,12 +24,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.core.models import News, Event
-from src.core.config import settings
-from src.services.events.event_extractor import EventExtractor
-from src.services.events.cmnln_engine import CMLNEngine
-from src.services.moex.moex_prices import MOEXPriceService, EventStudyAnalyzer
-from src.graph_models import GraphService, EventNode, CausesRelation, ImpactsRelation
+from Parser.src.core.models import News, Event
+from Parser.src.core.config import settings
+from Parser.src.services.events.event_extractor import EventExtractor
+from Parser.src.services.events.cmnln_engine import CMLNEngine
+from Parser.src.services.moex.moex_prices import MOEXPriceService, EventStudyAnalyzer
+from Parser.src.graph_models import GraphService, EventNode, CausesRelation, ImpactsRelation
 
 # Импорт AI extraction
 from entity_recognition import CachedFinanceNERExtractor

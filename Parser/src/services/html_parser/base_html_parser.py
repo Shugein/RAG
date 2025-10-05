@@ -1,4 +1,4 @@
-# src/services/html_parser/base_html_parser.py
+#Parser.src/services/html_parser/base_html_parser.py
 """
 Базовый класс для HTML парсеров
 """
@@ -14,9 +14,9 @@ from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from src.core.models import Source, News, ParserState
-from src.services.storage.news_repository import NewsRepository
-from src.services.enricher.enrichment_service import EnrichmentService
+from Parser.src.core.models import Source, News, ParserState
+from Parser.src.services.storage.news_repository import NewsRepository
+from Parser.src.services.enricher.enrichment_service import EnrichmentService
 
 logger = logging.getLogger(__name__)
 

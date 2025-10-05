@@ -49,9 +49,9 @@ echo -e "${GREEN}Docker found: $(docker --version)${NC}"
 
 # Create project structure
 echo -e "${YELLOW}Creating project structure...${NC}"
-mkdir -p src/{api,core,services,utils}
-mkdir -p src/api/endpoints
-mkdir -p src/services/{telegram_parser,enricher,outbox,storage}
+mkdir -pParser.src/{api,core,services,utils}
+mkdir -pParser.src/api/endpoints
+mkdir -pParser.src/services/{telegram_parser,enricher,outbox,storage}
 mkdir -p config
 mkdir -p scripts
 mkdir -p docker
@@ -61,16 +61,16 @@ mkdir -p sessions
 mkdir -p models
 
 # Create __init__.py files
-touch src/__init__.py
-touch src/api/__init__.py
-touch src/api/endpoints/__init__.py
-touch src/core/__init__.py
-touch src/services/__init__.py
-touch src/services/telegram_parser/__init__.py
-touch src/services/enricher/__init__.py
-touch src/services/outbox/__init__.py
-touch src/services/storage/__init__.py
-touch src/utils/__init__.py
+touchParser.src/__init__.py
+touchParser.src/api/__init__.py
+touchParser.src/api/endpoints/__init__.py
+touchParser.src/core/__init__.py
+touchParser.src/services/__init__.py
+touchParser.src/services/telegram_parser/__init__.py
+touchParser.src/services/enricher/__init__.py
+touchParser.src/services/outbox/__init__.py
+touchParser.src/services/storage/__init__.py
+touchParser.src/utils/__init__.py
 
 echo -e "${GREEN}Project structure created${NC}"
 

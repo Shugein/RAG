@@ -8,10 +8,10 @@ from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from src.core.database import get_db
-from src.graph_models import GraphService, News, NewsType
-from src.services.impact_calculator import ImpactCalculator
-from src.services.covariance_service import CovarianceService
+from Parser.src.core.database import get_db
+from Parser.src.graph_models import GraphService, News, NewsType
+from Parser.src.services.impact_calculator import ImpactCalculator
+from Parser.src.services.covariance_service import CovarianceService
 
 router = APIRouter(prefix="/historical", tags=["historical"])
 

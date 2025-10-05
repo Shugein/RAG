@@ -1,4 +1,4 @@
-# src/services/enricher/ner_extractor.py
+#Parser.src/services/enricher/ner_extractor.py
 """
 Извлечение именованных сущностей (NER) с использованием DeepPavlov BERT
 Поддерживает мультиязычное извлечение организаций, персон, локаций, дат, денежных сумм

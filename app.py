@@ -4,7 +4,7 @@ Streamlit интерфейс для RAG системы
 import streamlit as st
 import pandas as pd
 import time
-from src.system.engine import RAGPipeline
+from Parser.src.system.engine import RAGPipeline
 
 # Настройка страницы
 st.set_page_config(

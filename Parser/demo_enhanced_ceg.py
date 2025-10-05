@@ -15,14 +15,14 @@ from typing import Dict, Any, List
 # Добавляем пути
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.core.database import init_db, close_db, get_db_session
-from src.core.models import News, Event
-from src.services.events.ceg_realtime_service import CEGRealtimeService
-from src.services.events.importance_calculator import ImportanceScoreCalculator
-from src.services.events.watchers import WatchersSystem
-from src.graph_models import GraphService
-from src.core.config import settings
-from src.utils.logging import setup_logging
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.core.models import News, Event
+from Parser.src.services.events.ceg_realtime_service import CEGRealtimeService
+from Parser.src.services.events.importance_calculator import ImportanceScoreCalculator
+from Parser.src.services.events.watchers import WatchersSystem
+from Parser.src.graph_models import GraphService
+from Parser.src.core.config import settings
+from Parser.src.utils.logging import setup_logging
 
 # Настройка логирования
 setup_logging()

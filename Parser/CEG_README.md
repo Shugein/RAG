@@ -151,7 +151,7 @@ python demo_ceg_pipeline.py
 
 ```bash
 # Запустить FastAPI с CEG endpoints
-uvicorn src.api.main:app --reload --port 8000
+uvicornParser.src.api.main:app --reload --port 8000
 ```
 
 **API доступен:**

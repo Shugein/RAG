@@ -39,9 +39,9 @@ CEG Parser Service
 ### Новые возможности
 
 ```python
-class TelegramParserServiceCEG:
+class Telegram_ParserServiceCEG:
     """
-    🚀 УЛУЧШЕННЫЙ Telegram Parser с BATCH обработкой и полным CEG анализом
+    🚀 УЛУЧШЕННЫЙ Telegram_Parser с BATCH обработкой и полным CEG анализом
     🌐 + ИНТЕГРАЦИЯ HTML ПАРСЕРОВ (Forbes, Interfax)
     """
 ```
@@ -299,8 +299,8 @@ tail -f logs/ceg_realtime.log
 # Проверка источников в БД
 python -c "
 import asyncio
-from src.core.database import init_db, close_db, get_db_session
-from src.core.models import Source
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.core.models import Source
 from sqlalchemy import select
 
 async def check_sources():

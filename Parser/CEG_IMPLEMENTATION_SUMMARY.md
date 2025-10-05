@@ -183,7 +183,7 @@ API_KEY_2=your_key python demo_ceg_pipeline.py
 
 ### 3. Запуск API
 ```bash
-uvicorn src.api.main:app --reload --port 8000
+uvicornParser.src.api.main:app --reload --port 8000
 ```
 
 ### 4. Визуализация в Neo4j Browser
@@ -202,8 +202,8 @@ LIMIT 50
 
 ### Python API
 ```python
-from src.services.events.event_extractor import EventExtractor
-from src.services.events.cmnln_engine import CMLNEngine
+from Parser.src.services.events.event_extractor import EventExtractor
+from Parser.src.services.events.cmnln_engine import CMLNEngine
 
 # Event extraction
 extractor = EventExtractor()
@@ -273,14 +273,14 @@ ORDER BY i.price_impact DESC
 **Время выполнения:** ~2 часа (согласно плану)
 
 **Создано файлов:** 8
-1. src/services/enricher/enrichment_service.py (изменен)
-2. src/core/models.py (изменен, добавлена Event)
-3. src/services/events/event_extractor.py (новый)
-4. src/graph_models.py (расширен CEG методами)
-5. src/services/events/cmnln_engine.py (новый)
-6. src/services/moex/moex_prices.py (новый)
+1.Parser.src/services/enricher/enrichment_service.py (изменен)
+2.Parser.src/core/models.py (изменен, добавлена Event)
+3.Parser.src/services/events/event_extractor.py (новый)
+4.Parser.src/graph_models.py (расширен CEG методами)
+5.Parser.src/services/events/cmnln_engine.py (новый)
+6.Parser.src/services/moex/moex_prices.py (новый)
 7. demo_ceg_pipeline.py (новый)
-8. src/api/endpoints/ceg.py (новый)
+8.Parser.src/api/endpoints/ceg.py (новый)
 
 **Строк кода:** ~1500+ LOC
 

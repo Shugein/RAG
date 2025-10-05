@@ -1,4 +1,4 @@
-# src/api/schemas.py
+#Parser.src/api/schemas.py
 """
 Pydantic схемы для валидации данных в API
 """

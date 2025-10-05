@@ -1,5 +1,5 @@
 # Вместо прямых вызовов - использовать события через RabbitMQ
-# src/services/event_bus.py
+#Parser.src/services/event_bus.py
 
 class EventBus:
     """Централизованная шина событий"""

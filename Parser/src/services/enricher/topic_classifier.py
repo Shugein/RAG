@@ -1,4 +1,4 @@
-# src/services/enricher/topic_classifier.py
+#Parser.src/services/enricher/topic_classifier.py
 """
 Классификатор новостей по отраслям, странам и типам
 Интегрирован с графовой моделью Neo4j
@@ -16,12 +16,12 @@ import json
 import httpx
 from redis import asyncio as aioredis
 
-from src.core.config import settings
-from src.graph_models import (
+from Parser.src.core.config import settings
+from Parser.src.graph_models import (
     News, Company, Sector, Country, Market, 
     NewsType, NewsSubtype, GraphService
 )
-from src.services.enricher.sector_mapper import SectorMapper, SectorTaxonomy
+from Parser.src.services.enricher.sector_mapper import SectorMapper, SectorTaxonomy
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +95,8 @@ class TopicClassifier:
         # HTTP клиент для внешних API
         self.http_client = httpx.AsyncClient(
             timeout=30.0,
-            headers={"User-Agent": "RADAR-AI-TopicClassifier/1.0"}
+            headers={"User-Agent": "RADAR-AI-TopicClassifier/1.0"},
+            trust_env=False  # Ignore environment proxy settings
         )
         
         # Redis для кеширования

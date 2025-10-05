@@ -1,4 +1,4 @@
-# src/services/events/importance_calculator.py
+#Parser.src/services/events/importance_calculator.py
 """
 Importance Score Calculator для CEG событий
 Реализует многокомпонентную оценку важности событий:
@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 from statistics import median, mean
 from collections import defaultdict, Counter
 
-from src.core.models import News, Event
-from src.graph_models import GraphService
+from Parser.src.core.models import News, Event
+from Parser.src.graph_models import GraphService
 
 logger = logging.getLogger(__name__)
 

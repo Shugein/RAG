@@ -1,4 +1,4 @@
-# src/services/telegram_parser/parser.py
+#Parser.src/services/telegram_parser/parser.py
 
 import asyncio
 import hashlib
@@ -12,16 +12,16 @@ from telethon.tl.types import Message, MessageMediaPhoto, MessageMediaDocument
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from src.core.models import Source, News, Image, ParserState, OutboxEvent
-from src.services.telegram_parser.antispam import AntiSpamFilter
-from src.services.storage.news_repository import NewsRepository
-from src.services.storage.image_service import ImageService
-from src.services.enricher.enrichment_service import EnrichmentService
+from Parser.src.core.models import Source, News, Image, ParserState, OutboxEvent
+from Parser.src.services.telegram_parser.antispam import AntiSpamFilter
+from Parser.src.services.storage.news_repository import NewsRepository
+from Parser.src.services.storage.image_service import ImageService
+from Parser.src.services.enricher.enrichment_service import EnrichmentService
 
 logger = logging.getLogger(__name__)
 
 
-class TelegramParser:
+class Telegram_Parser:
     def __init__(
         self,
         client: TelegramClient,

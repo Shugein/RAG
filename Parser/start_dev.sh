@@ -21,7 +21,7 @@ sleep 10
 if command -v gnome-terminal &> /dev/null; then
     # For GNOME
     gnome-terminal --tab --title="API" -- bash -c "source venv/bin/activate; python scripts/start_api.py; exec bash"
-    gnome-terminal --tab --title="Telegram Parser" -- bash -c "source venv/bin/activate; python scripts/start_telegram_parser.py; exec bash"
+    gnome-terminal --tab --title="Telegram_Parser" -- bash -c "source venv/bin/activate; python scripts/start_telegram_parser.py; exec bash"
     gnome-terminal --tab --title="Outbox Relay" -- bash -c "source venv/bin/activate; python scripts/start_outbox_relay.py; exec bash"
 elif command -v osascript &> /dev/null; then
     # For macOS

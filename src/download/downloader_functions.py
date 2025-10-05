@@ -8,7 +8,14 @@ from nltk.stem import WordNetLemmatizer
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
-from src.system.entity_recognition import CachedFinanceNERExtractor
+try:
+    # Пробуем импортировать локальную модель
+    from src.system.entity_recognition_local import LocalFinanceNERExtractor
+    USE_LOCAL_NER = True
+except ImportError:
+    # Fallback на API модель
+    from src.system.entity_recognition import CachedFinanceNERExtractor
+    USE_LOCAL_NER = False
 
 nltk.download('wordnet')
 
@@ -66,13 +73,13 @@ ds = load_news_from_json()
 ### === Preparing data === ###
 documents = [
     Document(
-        page_content=row['text'],
+        page_content=row.get('text', ''),
         metadata={
-            "title": row["title"],
-            'timestamp': row['timestamp'],
-            'url': row['url'],
-            'source': row['source'],
-            'clear_txt': row['text']
+            "title": row.get("title", ""),
+            'timestamp': row.get('timestamp', row.get('date', '')),
+            'url': row.get('url', ''),
+            'source': row.get('source', ''),
+            'clear_txt': row.get('text', '')
         },
     )
     for row in ds

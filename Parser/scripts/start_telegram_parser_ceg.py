@@ -34,31 +34,33 @@ from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.config import settings
-from src.core.database import init_db, close_db, get_db_session
-from src.services.telegram_parser.client import TelegramClientManager
-from src.services.telegram_parser.parser import TelegramParser
-from src.services.telegram_parser.antispam import AntiSpamFilter
-from src.services.enricher.enrichment_service import EnrichmentService
-from src.services.enricher.moex_linker import MOEXLinker
-from src.utils.logging import setup_logging
-from src.core.models import Source, News, SourceKind
-from src.graph_models import GraphService
-from src.services.html_parser.html_parser_service import HTMLParserService
-from entity_recognition import CachedFinanceNERExtractor
+from Parser.src.core.config import settings
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.services.telegram_parser.client import TelegramClientManager
+from Parser.src.services.telegram_parser.parser import Telegram_Parser
+from Parser.src.services.telegram_parser.antispam import AntiSpamFilter
+from Parser.src.services.enricher.enrichment_service import EnrichmentService
+from Parser.src.services.enricher.moex_linker import MOEXLinker
+from Parser.src.utils.logging import setup_logging
+from Parser.src.core.models import Source, News, SourceKind
+from Parser.src.graph_models import GraphService
+from Parser.src.services.html_parser.html_parser_service import HTMLParserService
+from Parser.entity_recognition import CachedFinanceNERExtractor
 try:
-    from entity_recognition_local import LocalFinanceNERExtractor
+    from Parser.entity_recognition_local import LocalFinanceNERExtractor
 except ImportError:
-    logger.warning("LocalFinanceNERExtractor not available, will use API only")
-    LocalFinanceNERExtractor = None
-from sqlalchemy import select, and_
+    try:
+        from entity_recognition_local import LocalFinanceNERExtractor
+    except ImportError:
+        LocalFinanceNERExtractor = None
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
 
-class TelegramParserServiceCEG:
+class Telegram_ParserServiceCEG:
     """
-    🚀 УЛУЧШЕННЫЙ Telegram Parser с BATCH обработкой и полным CEG анализом
+    🚀 УЛУЧШЕННЫЙ Telegram_Parser с BATCH обработкой и полным CEG анализом
     🌐 + ИНТЕГРАЦИЯ HTML ПАРСЕРОВ (Forbes, Interfax)
 
     НОВЫЕ ВОЗМОЖНОСТИ:
@@ -229,7 +231,17 @@ class TelegramParserServiceCEG:
                     use_local_ai=self.use_local_ai
                 )
                 await self.enricher.initialize()
-                
+
+                # Инициализация CEG service с нашим graph_service
+                if self.graph_service:
+                    from Parser.src.services.events.ceg_realtime_service import CEGRealtimeService
+                    self.enricher.ceg_service = CEGRealtimeService(
+                        session=session,
+                        graph_service=self.graph_service,
+                        lookback_window=30  # 30 дней для ретроспективного анализа
+                    )
+                    logger.info("   ✓ CEG Real-time Service initialized with graph_service")
+
                 # Инициализация HTML Parser Service
                 logger.info("🌐 Initializing HTML Parser Service...")
                 self.html_parser_service = HTMLParserService(
@@ -242,8 +254,7 @@ class TelegramParserServiceCEG:
                 logger.info(f"   ✓ NER extractor: {type(self.ner_extractor).__name__}")
 
                 if self.enricher.ceg_service:
-                    logger.info("   ✓ CEG Real-time Service initialized")
-                    logger.info(f"   ✓ Lookback window: {self.enricher.ceg_service.lookback_window} days")
+                    logger.info(f"   ✓ CEG lookback window: {self.enricher.ceg_service.lookback_window} days")
                 else:
                     logger.warning("   ⚠ CEG Service not available (Neo4j not connected?)")
 
@@ -321,7 +332,7 @@ class TelegramParserServiceCEG:
 
         # Сначала выполняем batch backfill если нужно
         async with get_db_session() as session:
-            parser = TelegramParser(
+            parser = Telegram_Parser(
                 client=self.client,
                 db_session=session,
                 anti_spam=AntiSpamFilter(Path("config/ad_rules.yml")),
@@ -365,7 +376,7 @@ class TelegramParserServiceCEG:
         while self.running:
             try:
                 async with get_db_session() as session:
-                    parser = TelegramParser(
+                    parser = Telegram_Parser(
                         client=self.client,
                         db_session=session,
                         anti_spam=AntiSpamFilter(Path("config/ad_rules.yml")),
@@ -467,7 +478,7 @@ class TelegramParserServiceCEG:
         except Exception as e:
             logger.error(f"❌ Fatal error in HTML batch monitoring {source.code}: {e}", exc_info=True)
 
-    async def _collect_news_batch(self, parser: TelegramParser, source: Source, days: int) -> List[Dict[str, Any]]:
+    async def _collect_news_batch(self, parser: Telegram_Parser, source: Source, days: int) -> List[Dict[str, Any]]:
         """📊 Собирает новости из Telegram в batch формате с настройками"""
         try:
             # Настраиваем лимит в зависимости от режима
@@ -515,9 +526,6 @@ class TelegramParserServiceCEG:
                 return []
             
             # Получаем последние новости из БД для этого источника
-            from src.services.storage.news_repository import NewsRepository
-            news_repo = NewsRepository(session)
-            
             # Получаем последние новости (за последние дни)
             days_back = self.days if not self.realtime_mode else 1
             
@@ -552,7 +560,7 @@ class TelegramParserServiceCEG:
             logger.error(f"❌ Error collecting HTML news batch from {source.name}: {e}")
             return []
 
-    async def _fetch_telegram_messages(self, parser: TelegramParser, source: Source, days: int, limit: int) -> List[Dict[str, Any]]:
+    async def _fetch_telegram_messages(self, parser: Telegram_Parser, source: Source, days: int, limit: int) -> List[Dict[str, Any]]:
         """Получает сообщения из Telegram с фильтрацией"""
         messages = []
         collected = 0
@@ -596,43 +604,42 @@ class TelegramParserServiceCEG:
             raise
 
     async def _process_news_batch(self, news_batch: List[Dict[str, Any]], source: Source) -> Dict[str, Any]:
-        """🧠 Обрабатывает batch новостей через NER и CEG с чанками"""
+        """🧠 Обрабатывает batch новостей через NER и CEG с параллельными чанками"""
         try:
-            logger.info(f"🔍 Processing {len(news_batch)} news items in batches of {self.batch_size}")
-            
             # Разбиваем на чанки для обработки
+            chunks = []
+            for i in range(0, len(news_batch), self.batch_size):
+                chunk = news_batch[i:i + self.batch_size]
+                chunks.append((i // self.batch_size + 1, chunk))
+
+            total_chunks = len(chunks)
+            logger.info(f"🔍 Processing {len(news_batch)} news items in {total_chunks} parallel chunks of {self.batch_size}")
+
+            # Параллельная обработка чанков
+            chunk_tasks = [
+                self._process_single_chunk(chunk_num, chunk, total_chunks, source)
+                for chunk_num, chunk in chunks
+            ]
+
+            # Запускаем все чанки параллельно
+            chunk_results = await asyncio.gather(*chunk_tasks, return_exceptions=True)
+
+            # Собираем результаты
             all_ner_results = []
             all_graph_results = {"nodes_created": 0, "links_created": 0}
             all_ceg_results = []
-            
-            for i in range(0, len(news_batch), self.batch_size):
-                chunk = news_batch[i:i + self.batch_size]
-                logger.info(f"📦 Processing chunk {i//self.batch_size + 1}/{(len(news_batch) + self.batch_size - 1)//self.batch_size}")
-                
-                # Формируем JSON для NER обработки чанка
-                news_texts = [item["text"] for item in chunk]
-                news_metadata = [{"id": item["id"], "date": item["date"], "source": item["source_name"]} for item in chunk]
-                
-                # Обрабатываем чанк через NER систему с retry
-                ner_chunk_results = await self._retry_with_backoff(
-                    self._process_ner_chunk, news_texts, news_metadata
-                )
-                
-                if ner_chunk_results:
-                    all_ner_results.extend(ner_chunk_results.get('news_items', []))
-                    
-                    # Создаем сущности в графовой БД для чанка
-                    graph_chunk_results = await self._create_graph_entities(ner_chunk_results, chunk)
-                    all_graph_results["nodes_created"] += graph_chunk_results.get("nodes_created", 0)
-                    all_graph_results["links_created"] += graph_chunk_results.get("links_created", 0)
-                    
-                    # Выполняем CEG анализ для чанка
-                    ceg_chunk_results = await self._perform_ceg_analysis(graph_chunk_results, source)
-                    all_ceg_results.append(ceg_chunk_results)
-                
-                # Задержка между чанками для избежания rate limiting
-                if i + self.batch_size < len(news_batch):
-                    await asyncio.sleep(self.batch_delay)
+
+            for result in chunk_results:
+                if isinstance(result, Exception):
+                    logger.error(f"❌ Chunk processing failed: {result}")
+                    continue
+
+                if result and not result.get("error"):
+                    all_ner_results.extend(result.get("ner_results", []))
+                    all_graph_results["nodes_created"] += result.get("nodes_created", 0)
+                    all_graph_results["links_created"] += result.get("links_created", 0)
+                    if result.get("ceg_results"):
+                        all_ceg_results.append(result["ceg_results"])
             
             logger.info(f"✅ NER extracted {len(all_ner_results)} processed items from {len(news_batch)} news")
             
@@ -659,19 +666,108 @@ class TelegramParserServiceCEG:
             logger.error(f"❌ Error processing news batch: {e}", exc_info=True)
             return {"error": str(e), "total_news": len(news_batch)}
 
+    async def _process_single_chunk(self, chunk_num: int, chunk: List[Dict[str, Any]], total_chunks: int, source: Source) -> Dict[str, Any]:
+        """Обрабатывает один чанк новостей (для параллельного выполнения)"""
+        try:
+            logger.info(f"📦 Processing chunk {chunk_num}/{total_chunks} with {len(chunk)} items")
+
+            # Формируем JSON для NER обработки чанка
+            news_texts = [item["text"] for item in chunk]
+            news_metadata = [
+                {
+                    "id": item["id"],
+                    "date": item["date"].isoformat() if hasattr(item["date"], 'isoformat') else str(item["date"]),
+                    "source": item["source_name"]
+                }
+                for item in chunk
+            ]
+
+            # Обрабатываем чанк через NER систему с retry
+            ner_chunk_results = await self._retry_with_backoff(
+                self._process_ner_chunk, news_texts, news_metadata
+            )
+
+            if not ner_chunk_results:
+                return {"error": "NER processing failed", "ner_results": [], "nodes_created": 0, "links_created": 0}
+
+            # Создаем сущности в графовой БД для чанка
+            graph_chunk_results = await self._create_graph_entities(ner_chunk_results, chunk)
+
+            # Выполняем CEG анализ для чанка
+            ceg_chunk_results = await self._perform_ceg_analysis(graph_chunk_results, source)
+
+            logger.info(f"✅ Chunk {chunk_num}/{total_chunks} completed: {graph_chunk_results.get('nodes_created', 0)} nodes, {graph_chunk_results.get('links_created', 0)} links")
+
+            return {
+                "ner_results": ner_chunk_results.get('news_items', []),
+                "nodes_created": graph_chunk_results.get("nodes_created", 0),
+                "links_created": graph_chunk_results.get("links_created", 0),
+                "ceg_results": ceg_chunk_results
+            }
+
+        except Exception as e:
+            logger.error(f"❌ Error processing chunk {chunk_num}: {e}", exc_info=True)
+            return {"error": str(e), "ner_results": [], "nodes_created": 0, "links_created": 0}
+
     async def _process_ner_chunk(self, news_texts: List[str], news_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Обрабатывает чанк новостей через NER систему"""
         try:
             if self.use_local_ai:
-                # Локальная обработка
-                if hasattr(self.ner_extractor, 'extract_entities_batch_async'):
-                    return await self.ner_extractor.extract_entities_batch_async(news_texts, news_metadata)
-                else:
-                    # Fallback для синхронной версии
-                    return self.ner_extractor.extract_entities_json_batch(news_texts, news_metadata)
+                # Локальная обработка (синхронная, т.к. LocalFinanceNERExtractor не асинхронный)
+                # Запускаем в executor чтобы не блокировать event loop
+                import concurrent.futures
+                loop = asyncio.get_event_loop()
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    entities_list = await loop.run_in_executor(
+                        executor,
+                        lambda: self.ner_extractor.extract_entities_batch(news_texts, verbose=False)
+                    )
             else:
-                # API обработка
-                return self.ner_extractor.extract_entities_json_batch(news_texts, news_metadata)
+                # API обработка - используем асинхронный метод напрямую
+                entities_list = await self.ner_extractor.extract_entities_batch_async(news_texts, verbose=False)
+
+            # Преобразуем результаты в формат для дальнейшей обработки
+            news_items = []
+            for i, entities in enumerate(entities_list):
+                if entities:
+                    news_items.append({
+                        "id": news_metadata[i]["id"],
+                        "date": news_metadata[i]["date"],
+                        "source": news_metadata[i]["source"],
+                        "companies": [{"name": c.name, "ticker": c.ticker, "sector": c.sector} for c in entities.companies],
+                        "people": [{"name": p.name, "position": p.position, "company": p.company} for p in entities.people],
+                        "markets": [{"name": m.name, "type": m.type, "value": m.value, "change": m.change} for m in entities.markets],
+                        "financial_metrics": [{"metric_type": fm.metric_type, "value": fm.value, "company": fm.company} for fm in entities.financial_metrics],
+                        "event": "",  # Модель не извлекает event напрямую
+                        "event_types": [],
+                        "sector": entities.companies[0].sector if entities.companies else None,
+                        "country": "RU",
+                        "is_advertisement": False,
+                        "content_types": [],
+                        "confidence_score": 0.9 if not self.use_local_ai else 0.8,
+                        "urgency_level": "normal"
+                    })
+                else:
+                    # Пустой результат для неудачной обработки
+                    news_items.append({
+                        "id": news_metadata[i]["id"],
+                        "date": news_metadata[i]["date"],
+                        "source": news_metadata[i]["source"],
+                        "companies": [],
+                        "people": [],
+                        "markets": [],
+                        "financial_metrics": [],
+                        "event": "",
+                        "event_types": [],
+                        "sector": None,
+                        "country": "RU",
+                        "is_advertisement": False,
+                        "content_types": [],
+                        "confidence_score": 0.0,
+                        "urgency_level": "normal"
+                    })
+
+            return {"news_items": news_items}
         except Exception as e:
             logger.error(f"❌ NER processing failed for chunk: {e}")
             raise
@@ -701,16 +797,17 @@ class TelegramParserServiceCEG:
             if not self.graph_service:
                 logger.warning("⚠️ Graph service not available, skipping graph creation")
                 return {"nodes_created": 0, "links_created": 0, "error": "Graph service unavailable"}
-            
+
             nodes_created = 0
             links_created = 0
-            
+
             for i, news_item in enumerate(ner_results.get('news_items', [])):
                 if not news_item or i >= len(news_batch):
                     continue
-                    
+
                 news_data = news_batch[i]
-                news_id = str(uuid4())
+                # Используем реальный ID из базы данных вместо генерации нового
+                news_id = str(news_data.get("id", uuid4()))
                 
                 try:
                     # Создаем узел новости с retry
@@ -719,26 +816,31 @@ class TelegramParserServiceCEG:
                         news_id, news_data, news_item
                     )
                     nodes_created += 1
-                    
+                    logger.debug(f"✅ Created news node: {news_id}")
+
                     # Поиск тикеров через MOEX Linker
                     ticker_matches = await self._find_tickers_for_news(news_data, news_item)
-                    
+
                     # Создаем компании с найденными тикерами
-                    for company in news_item.get("companies", []):
-                        if company.get("name"):
-                            # Ищем тикер для этой компании
-                            ticker_info = self._find_ticker_for_company(company.get("name", ""), ticker_matches)
-                            
-                            company_id = f"company_{hash(company.get('name', ''))}"
-                            await self._retry_with_backoff(
-                                self._create_company_node_with_ticker_safe,
-                                company_id, company, ticker_info
-                            )
-                            await self._retry_with_backoff(
-                                self._link_news_to_company_safe,
-                                news_id, company_id
-                            )
-                            links_created += 1
+                    companies = news_item.get("companies", [])
+                    if companies:
+                        logger.debug(f"📊 Found {len(companies)} companies in news")
+                        for company in companies:
+                            if company.get("name"):
+                                # Ищем тикер для этой компании
+                                ticker_info = self._find_ticker_for_company(company.get("name", ""), ticker_matches)
+
+                                company_id = f"company_{hash(company.get('name', ''))}"
+                                await self._retry_with_backoff(
+                                    self._create_company_node_with_ticker_safe,
+                                    company_id, company, ticker_info
+                                )
+                                await self._retry_with_backoff(
+                                    self._link_news_to_company_safe,
+                                    news_id, company_id
+                                )
+                                links_created += 1
+                                logger.debug(f"🔗 Linked news {news_id} to company {company.get('name')}")
                     
                     # Создаем персон и связываем
                     for person in news_item.get("people", []):
@@ -784,15 +886,37 @@ class TelegramParserServiceCEG:
 
     async def _create_news_node_safe(self, news_id: str, news_data: Dict[str, Any], news_item: Dict[str, Any]):
         """Безопасное создание узла новости"""
+        # Преобразуем дату в datetime если это строка или оставляем как есть
+        published_at = news_data.get("date")
+        if isinstance(published_at, str):
+            # Парсим ISO формат строки обратно в datetime
+            try:
+                published_at = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                # Если не получилось распарсить, используем текущее время
+                published_at = datetime.now()
+        elif not published_at:
+            published_at = datetime.now()
+
+        # Формируем заголовок из события или текста
+        title = news_item.get("event", "")[:200]
+        if not title:
+            title = news_data.get("title", news_data.get("text", "")[:200])
+        if not title:
+            title = "Telegram News"
+
         await self.graph_service.create_news_node({
             "id": news_id,
-            "url": f"telegram://{news_data['external_id']}",
-            "title": news_item.get("event", "")[:200] or "Telegram News",
-            "text": news_data["text"][:1000],  # Ограничиваем размер текста
-            "published_at": news_data["date"],
-            "source": news_data["source_name"],
+            "url": f"telegram://{news_data.get('url') or news_data.get('external_id', '')}",
+            "title": title,
+            "text": news_data.get("text", "")[:1000],  # Ограничиваем размер текста
+            "published_at": published_at,
+            "source": news_data.get("source_name", ""),
             "lang_orig": "ru",
-            "lang_norm": "ru"
+            "lang_norm": "ru",
+            "no_impact": False,
+            "news_type": None,
+            "news_subtype": None
         })
 
     async def _create_company_node_safe(self, company_id: str, company: Dict[str, Any]):
@@ -840,13 +964,34 @@ class TelegramParserServiceCEG:
             if not self.moex_linker:
                 logger.warning("⚠️ MOEX Linker not available")
                 return []
-            
-            # Объединяем текст новости для поиска
-            full_text = f"{news_data.get('text', '')}"
-            
+
+            # Собираем все возможные тексты для поиска
+            search_texts = []
+
+            # 1. Текст новости
+            if news_data.get('text'):
+                search_texts.append(news_data['text'])
+
+            # 2. Названия компаний из NER
+            companies_from_ner = news_item.get("companies", [])
+            if companies_from_ner:
+                for company in companies_from_ner:
+                    if company.get("name"):
+                        search_texts.append(company["name"])
+
+            # 3. Заголовок если есть
+            if news_data.get('title'):
+                search_texts.append(news_data['title'])
+
+            if not search_texts:
+                return []
+
+            # Объединяем все тексты
+            full_text = " | ".join(search_texts)
+
             # Ищем компании в тексте
             company_matches = await self.moex_linker.link_companies(full_text)
-            
+
             # Преобразуем в удобный формат
             ticker_matches = []
             for match in company_matches:
@@ -862,12 +1007,16 @@ class TelegramParserServiceCEG:
                         "board": match.board,
                         "original_text": match.text
                     })
-            
-            logger.info(f"🔍 Found {len(ticker_matches)} ticker matches for news")
+
+            if ticker_matches:
+                logger.info(f"🔍 Found {len(ticker_matches)} ticker matches: {[t['ticker'] for t in ticker_matches]}")
+            else:
+                logger.debug(f"🔍 No tickers found in text: {full_text[:100]}...")
+
             return ticker_matches
-            
+
         except Exception as e:
-            logger.error(f"❌ Error finding tickers: {e}")
+            logger.error(f"❌ Error finding tickers: {e}", exc_info=True)
             return []
 
     def _find_ticker_for_company(self, company_name: str, ticker_matches: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -1140,9 +1289,9 @@ class TelegramParserServiceCEG:
                 
                 # Формируем детальную информацию о новости
                 detailed_item = {
-                    "news_id": news_data["id"],
+                    "news_id": str(news_data["id"]) if news_data.get("id") else None,
                     "source": {
-                        "id": news_data["source_id"],
+                        "id": str(news_data["source_id"]) if news_data.get("source_id") else None,
                         "name": news_data["source_name"],
                         "external_id": news_data["external_id"]
                     },
@@ -1223,22 +1372,32 @@ class TelegramParserServiceCEG:
             if "detailed_response" in results:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"batch_results_{timestamp}.json"
-                
+
                 # Создаем директорию logs если не существует
                 logs_dir = Path("logs")
                 logs_dir.mkdir(exist_ok=True)
-                
+
+                # Кастомный JSON encoder для обработки UUID и datetime
+                from uuid import UUID
+                class CustomJSONEncoder(json.JSONEncoder):
+                    def default(self, obj):
+                        if isinstance(obj, UUID):  # UUID
+                            return str(obj)
+                        if isinstance(obj, datetime):
+                            return obj.isoformat()
+                        return super().default(obj)
+
                 with open(logs_dir / filename, "w", encoding="utf-8") as f:
-                    json.dump(results["detailed_response"], f, ensure_ascii=False, indent=2)
-                
+                    json.dump(results["detailed_response"], f, ensure_ascii=False, indent=2, cls=CustomJSONEncoder)
+
                 logger.info(f"💾 Batch results saved to logs/{filename}")
-            
+
             # Сохраняем детальный JSON в базу данных PostgreSQL
             await self._save_detailed_json_to_db(results.get("detailed_response", {}))
-            
+
             # Коммитим изменения в Neo4j
             await session.commit()
-            
+
         except Exception as e:
             logger.error(f"Error saving batch results: {e}")
 
@@ -1249,8 +1408,6 @@ class TelegramParserServiceCEG:
                 return
                 
             async with get_db_session() as db_session:
-                from sqlalchemy import update
-                
                 # Если это список новостей, обрабатываем каждую
                 if isinstance(detailed_response, list):
                     for news_data in detailed_response:
@@ -1341,6 +1498,10 @@ class TelegramParserServiceCEG:
         if self.client_manager:
             await self.client_manager.disconnect()
 
+        # Закрываем Enricher (включая все GraphService внутри)
+        if self.enricher:
+            await self.enricher.close()
+
         # Закрываем MOEX Linker
         if self.moex_linker:
             await self.moex_linker.close()
@@ -1355,7 +1516,7 @@ class TelegramParserServiceCEG:
         logger.info("Telegram parser stopped")
 
 
-def signal_handler(signum, frame):
+def signal_handler(signum, _frame):
     """Обработка сигналов остановки"""
     logger.info(f"Received signal {signum}")
     asyncio.create_task(parser_service.stop())
@@ -1367,6 +1528,17 @@ async def main():
     global parser_service
 
     setup_logging()
+
+    # Загружаем переменные окружения из .env файла
+    from dotenv import load_dotenv
+    # Ищем .env в корне проекта (два уровня вверх от scripts/)
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    load_dotenv(dotenv_path=env_path)
+
+    # Выводим информацию для отладки
+    api_key_check = os.getenv("API_KEY_2") or os.getenv("OPENAI_API_KEY")
+    if api_key_check:
+        logger.info(f"✓ API ключ загружен из {env_path}: {api_key_check[:15]}...")
 
     try:
         print("\n" + "="*70)
@@ -1462,7 +1634,7 @@ async def main():
         signal.signal(signal.SIGTERM, signal_handler)
 
         # Создание и запуск сервиса с настройками
-        parser_service = TelegramParserServiceCEG(
+        parser_service = Telegram_ParserServiceCEG(
             days=days,
             realtime_mode=realtime_mode,
             use_local_ai=use_local_ai,

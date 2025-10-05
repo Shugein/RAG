@@ -11,8 +11,8 @@ from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.database import init_db, close_db, get_db_session
-from src.core.models import Source
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.core.models import Source
 from sqlalchemy import select
 
 async def load_sources():

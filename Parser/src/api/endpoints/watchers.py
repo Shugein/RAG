@@ -1,4 +1,4 @@
-# src/api/endpoints/watchers.py
+#Parser.src/api/endpoints/watchers.py
 """
 API endpoints for Watchers System (L0/L1/L2 monitoring)
 """
@@ -13,9 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func, desc
 from sqlalchemy.orm import selectinload
 
-from src.core.database import get_db_session
-from src.core.models import Event, TriggeredWatch, EventPrediction
-from src.api.schemas import TriggeredWatchResponse, EventPredictionResponse
+from Parser.src.core.database import get_db_session
+from Parser.src.core.models import Event, TriggeredWatch, EventPrediction
+from Parser.src.api.schemas import TriggeredWatchResponse, EventPredictionResponse
 
 logger = logging.getLogger(__name__)
 

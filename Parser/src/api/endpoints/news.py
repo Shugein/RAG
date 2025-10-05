@@ -1,4 +1,4 @@
-# src/api/endpoints/news.py
+#Parser.src/api/endpoints/news.py
 """
 News endpoints
 """
@@ -12,9 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_, func, desc
 from sqlalchemy.orm import selectinload
 
-from src.core.database import get_db
-from src.core.models import News, Source, Entity, LinkedCompany, Topic, Image
-from src.api.schemas import (
+from Parser.src.core.database import get_db
+from Parser.src.core.models import News, Source, Entity, LinkedCompany, Topic, Image
+from Parser.src.api.schemas import (
     NewsSearchRequest,
     NewsResponse,
     NewsListResponse,

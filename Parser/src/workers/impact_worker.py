@@ -11,8 +11,8 @@ from datetime import datetime
 import aio_pika
 from aio_pika import IncomingMessage
 
-from src.services.impact_calculator import ImpactCalculator
-from src.graph_models import GraphService
+from Parser.src.services.impact_calculator import ImpactCalculator
+from Parser.src.graph_models import GraphService
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class ImpactWorker:
         )
         
         # Калькулятор влияния
-        from src.services.market_data_service import MarketDataService
+        from Parser.src.services.market_data_service import MarketDataService
         market_data = MarketDataService()
         self.impact_calc = ImpactCalculator(market_data)
     

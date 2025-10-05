@@ -334,8 +334,8 @@ class GraphService:
             )
             return [record async for record in result]
     
-    async def create_news_node(self, news: News):
-        """Создать узел новости в графе"""
+    async def create_news_node(self, news: dict):
+        """Создать узел новости в графе (принимает словарь или Pydantic модель)"""
         async with self.driver.session() as session:
             query = """
             MERGE (n:News {id: $id})
@@ -352,19 +352,38 @@ class GraphService:
                 n.created_at = datetime()
             RETURN n
             """
-            await session.run(query, 
-                id=str(news.id),
-                url=news.url,
-                title=news.title,
-                text=news.text_plain or news.text_html or "",
-                published_at=news.published_at.isoformat(),
-                source=str(news.source_id),
-                lang_orig=news.lang,
-                lang_norm=news.lang,
-                no_impact=False,
-                news_type="news",
-                news_subtype=None
-            )
+
+            # Поддержка как словаря, так и Pydantic модели
+            if isinstance(news, dict):
+                # Словарь из start_telegram_parser_ceg.py
+                await session.run(query,
+                    id=str(news.get("id")),
+                    url=news.get("url", ""),
+                    title=news.get("title", ""),
+                    text=news.get("text", ""),
+                    published_at=news.get("published_at").isoformat() if hasattr(news.get("published_at"), 'isoformat') else str(news.get("published_at")),
+                    source=news.get("source", ""),
+                    lang_orig=news.get("lang_orig", "ru"),
+                    lang_norm=news.get("lang_norm", "ru"),
+                    no_impact=news.get("no_impact", False),
+                    news_type=news.get("news_type", "news"),
+                    news_subtype=news.get("news_subtype")
+                )
+            else:
+                # Pydantic модель (старый код)
+                await session.run(query,
+                    id=str(news.id),
+                    url=news.url,
+                    title=news.title,
+                    text=news.text_plain or news.text_html or "",
+                    published_at=news.published_at.isoformat(),
+                    source=str(news.source_id),
+                    lang_orig=news.lang,
+                    lang_norm=news.lang,
+                    no_impact=False,
+                    news_type="news",
+                    news_subtype=None
+                )
     
     async def create_entity_node(self, entity_id: str, text: str, entity_type: str, confidence: float):
         """Создать узел сущности в графе"""

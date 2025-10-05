@@ -12,7 +12,7 @@ import json
 from dotenv import load_dotenv
 from entity_recognition import CachedFinanceNERExtractor, GraphReadyEntities, GraphDataMapper
 try:
-    from src.graph_models import GraphService, News as GraphNews, Company, Market, EventNode
+    from Parser.src.graph_models import GraphService, News as GraphNews, Company, Market, EventNode
 except ImportError:
     # Создаем заглушки для демонстрации без полного проекта
     class GraphService:

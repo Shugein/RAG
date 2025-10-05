@@ -20,8 +20,8 @@ from weaviate.classes.config import Configure
 
 print("Using Weaviate with GPU-accelerated embeddings via Docker container")
 
-# Подключение к локальному серверу Weaviate (http://localhost:8080 по умолчанию)
-client = weaviate.connect_to_local()
+# Подключение к локальному серверу Weaviate на порту 8083
+client = weaviate.connect_to_local(port=8083, grpc_port=50051)
 assert client.is_ready(), "Weaviate is not ready"
 
 COLL_NAME = "NewsChunks"

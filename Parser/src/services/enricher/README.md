@@ -16,7 +16,7 @@
 
 **Использование:**
 ```python
-from src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.company_aliases import get_alias_manager
 
 # Получить менеджер
 alias_manager = get_alias_manager()
@@ -50,7 +50,7 @@ aliases = alias_manager.get_aliases_for_ticker("SBER")
 
 **Использование:**
 ```python
-from src.services.enricher.moex_auto_search import MOEXAutoSearch
+from Parser.src.services.enricher.moex_auto_search import MOEXAutoSearch
 
 # Инициализация
 searcher = MOEXAutoSearch()
@@ -102,7 +102,7 @@ class MOEXSecurityInfo:
 
 **Использование:**
 ```python
-from src.services.enricher.moex_linker import MOEXLinker
+from Parser.src.services.enricher.moex_linker import MOEXLinker
 
 # Инициализация (с автообучением)
 linker = MOEXLinker(enable_auto_learning=True)
@@ -210,8 +210,8 @@ auto_match = await searcher.auto_learn_from_ner(
 ### Пример 1: Обработка новости с автообучением
 
 ```python
-from src.services.enricher.ner_extractor import NERExtractor
-from src.services.enricher.moex_linker import MOEXLinker
+from Parser.src.services.enricher.ner_extractor import NERExtractor
+from Parser.src.services.enricher.moex_linker import MOEXLinker
 
 # Инициализация
 ner = NERExtractor(use_ml_ner=True)
@@ -242,7 +242,7 @@ await linker.close()
 ### Пример 2: Пакетный импорт компаний
 
 ```python
-from src.services.enricher.moex_auto_search import MOEXAutoSearch
+from Parser.src.services.enricher.moex_auto_search import MOEXAutoSearch
 
 searcher = MOEXAutoSearch()
 await searcher.initialize()
@@ -269,7 +269,7 @@ await searcher.close()
 ### Пример 3: Просмотр выученных алиасов
 
 ```python
-from src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.company_aliases import get_alias_manager
 
 manager = get_alias_manager()
 
@@ -305,7 +305,7 @@ print(f"SBER алиасы: {sber_aliases}")
 
 **Решение:** Вручную добавьте корректный алиас
 ```python
-from src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.company_aliases import get_alias_manager
 
 manager = get_alias_manager()
 manager.add_learned_alias("некорректный алиас", "ПРАВИЛЬНЫЙ_ТИКЕР")
@@ -340,7 +340,7 @@ KNOWN_ALIASES = {
 ### После:
 ```python
 # Импортируем общий менеджер
-from src.services.enricher.company_aliases import get_alias_manager
+from Parser.src.services.enricher.company_aliases import get_alias_manager
 
 self.alias_manager = get_alias_manager()
 ticker = self.alias_manager.get_ticker("сбер")

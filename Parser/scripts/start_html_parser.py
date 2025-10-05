@@ -11,9 +11,9 @@ from pathlib import Path
 # Добавляем корневую директорию проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.database import init_db, close_db, get_db_session
-from src.services.html_parser.html_parser_service import HTMLParserService
-from src.core.config import settings
+from Parser.src.core.database import init_db, close_db, get_db_session
+from Parser.src.services.html_parser.html_parser_service import HTMLParserService
+from Parser.src.core.config import settings
 
 # Настройка логирования
 logging.basicConfig(

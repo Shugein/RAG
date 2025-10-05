@@ -1,4 +1,4 @@
-# src/services/events/event_extractor.py
+#Parser.src/services/events/event_extractor.py
 """
 Event Extractor - извлечение событий из AI-extracted сущностей
 """
@@ -9,7 +9,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 from uuid import uuid4
 
-from src.core.models import News, Event
+from Parser.src.core.models import News, Event
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import asyncio
 import sys
-from src.core.database import init_db
-from src.core.config import settings
+from Parser.src.core.database import init_db
+from Parser.src.core.config import settings
 
 async def test_app():
     try:

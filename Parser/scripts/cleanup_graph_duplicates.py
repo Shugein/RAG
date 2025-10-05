@@ -10,11 +10,11 @@ import sys
 from typing import Dict, List, Any
 from pathlib import Path
 
-# Добавляем путь к src в PYTHONPATH
+# Добавляем путь кParser.src в PYTHONPATH
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from src.core.config import settings
-from src.graph_models import GraphService
+from Parser.src.core.config import settings
+from Parser.src.graph_models import GraphService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

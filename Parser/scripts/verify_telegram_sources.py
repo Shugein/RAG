@@ -13,15 +13,15 @@ import logging
 import sys
 from pathlib import Path
 
-# Add src to path
+# AddParser.src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import select
 from telethon.errors import UsernameInvalidError, UsernameNotOccupiedError
 
-from src.core.database import get_db_session, init_db
-from src.core.models import Source
-from src.services.telegram_parser.client import TelegramClientManager
+from Parser.src.core.database import get_db_session, init_db
+from Parser.src.core.models import Source
+from Parser.src.services.telegram_parser.client import TelegramClientManager
 
 logging.basicConfig(
     level=logging.INFO,

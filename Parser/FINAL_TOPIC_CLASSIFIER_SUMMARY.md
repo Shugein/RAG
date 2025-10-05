@@ -153,8 +153,8 @@ requirements.txt                  # 🔄 ОБНОВЛЕН: Добавлены з
 ## 🚀 ПРИМЕР ИСПОЛЬЗОВАНИЯ
 
 ```python
-from src.services.enricher.topic_classifier import TopicClassifier
-from src.graph_models import News, Company
+from Parser.src.services.enricher.topic_classifier import TopicClassifier
+from Parser.src.graph_models import News, Company
 
 # Инициализация
 classifier = TopicClassifier(taxonomy=SectorTaxonomy.ICB)

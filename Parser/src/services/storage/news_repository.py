@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_, func, desc
 from sqlalchemy.orm import selectinload
 
-from src.core.models import News, Source, Image, Entity, LinkedCompany, Topic
+from Parser.src.core.models import News, Source, Image, Entity, LinkedCompany, Topic
 
 logger = logging.getLogger(__name__)
 
