@@ -120,7 +120,7 @@ class CachedFinanceNERExtractor:
         self.api_key = api_key
         self.model = model
         self.enable_caching = enable_caching
-        self.base_url = "https://openrouter.ai/api/v1"
+        self.base_url = "https://openrouter.ai/"
         self.glossary = RussianFinanceGlossary()
         
         # Статистика для отслеживания экономии
