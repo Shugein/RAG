@@ -2,7 +2,10 @@
 
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN
+from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+
+from core.database.models import News
 
 class NewsClusterer:
     def __init__(self):

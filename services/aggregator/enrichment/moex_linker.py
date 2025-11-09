@@ -928,7 +928,7 @@ class MOEXEnrichmentProcessor:
         await self.linker.initialize()
         
         # Инициализируем граф
-        from Parser.src.radar.core.graph_models import GraphService
+        from core.graph.service import GraphService
         self.graph = GraphService(
             uri=settings.NEO4J_URI,
             user=settings.NEO4J_USER,
@@ -936,7 +936,7 @@ class MOEXEnrichmentProcessor:
         )
         
         # Инициализируем market data service
-        from Parser.src.radar.services.market_data_service import MarketDataService
+        from services.ceg.market.market_data_service import MarketDataService
         self.market_data = MarketDataService()
         await self.market_data.initialize()
         

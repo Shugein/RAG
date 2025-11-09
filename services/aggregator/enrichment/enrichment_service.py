@@ -16,7 +16,13 @@ from core.database.models import News, Entity, LinkedCompany, Topic
 # Заменяем старый NER на AI extraction
 # from services.aggregator.enrichment.ner_extractor import NERExtractor
 from core.nlp.entity_recognition import CachedFinanceNERExtractor  # GPT-5 API
-from entity_recognition_local import LocalFinanceNERExtractor  # Qwen3-4B local
+
+# Опциональный импорт локального NER
+try:
+    from entity_recognition_local import LocalFinanceNERExtractor  # Qwen3-4B local
+except ImportError:
+    LocalFinanceNERExtractor = None
+
 from services.aggregator.enrichment.moex_linker import MOEXLinker
 from services.aggregator.enrichment.topic_classifier import TopicClassifier
 from services.aggregator.outbox.publisher import EventPublisher
@@ -39,7 +45,7 @@ class EnrichmentService:
 
         # AI NER extraction (dual-pass: Qwen быстро → GPT-5 верификация)
         self.use_local_ai = use_local_ai
-        if use_local_ai:
+        if use_local_ai and LocalFinanceNERExtractor is not None:
             logger.info("Initializing LOCAL AI NER (Qwen3-4B)")
             self.ai_ner = LocalFinanceNERExtractor(
                 model_name="unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
@@ -47,6 +53,8 @@ class EnrichmentService:
                 batch_size=5
             )
         else:
+            if use_local_ai and LocalFinanceNERExtractor is None:
+                logger.warning("Local AI NER not available, falling back to API NER")
             logger.info("Initializing GPT-5 AI NER (OpenAI API)")
             api_key = os.getenv("API_KEY_2") or os.getenv("OPENAI_API_KEY")
             if not api_key:

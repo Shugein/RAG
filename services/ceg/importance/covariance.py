@@ -8,13 +8,9 @@ import logging
 import asyncio
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
-try:
-    import numpy as np
-    import pandas as pd
-except ImportError:
-    # Fallback для случаев когда numpy/pandas не установлены
-    np = None
-    pd = None
+import numpy as np
+import pandas as pd
+
 from dataclasses import dataclass
 
 from core.database.config import settings
