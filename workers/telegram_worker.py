@@ -50,7 +50,7 @@ try:
     from Parser.entity_recognition_local import LocalFinanceNERExtractor
 except ImportError:
     try:
-        from entity_recognition_local import LocalFinanceNERExtractor
+        from core.nlp.entity_recognition_local import LocalFinanceNERExtractor
     except ImportError:
         LocalFinanceNERExtractor = None
 from sqlalchemy import select
