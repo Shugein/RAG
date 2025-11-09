@@ -1,5 +1,0 @@
-FROM news-aggregator-base:latest
-
-EXPOSE 8000
-
-CMD ["python", "scripts/start_api.py"]

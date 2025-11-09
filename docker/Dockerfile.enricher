@@ -1,0 +1,6 @@
+FROM news-aggregator-base:latest
+
+# Note: Natasha is deprecated, now using GPT-5 for NER
+# Models are downloaded on-demand via OpenAI API
+
+CMD ["python", "workers/enrichment_worker.py"]

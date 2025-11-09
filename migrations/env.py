@@ -4,7 +4,20 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+# В начале файла добавьте:
+import sys
+from pathlib import Path
 
+# Добавляем корневую директорию проекта в путь
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+# Импортируйте модели и настройки:
+from Parser.src.core.models import Base
+from Parser.src.core.config import settings
+
+# Установите target_metadata:
+target_metadata = Base.metadata
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -16,21 +29,13 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-import sys
-from pathlib import Path
-
-# Add ParserParser.src to path
-parser_src = Path(__file__).parent.parent / "Parser" / "src"
-sys.path.insert(0, str(parser_src))
-
-from core.models import Base
-target_metadata = Base.metadata
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -44,11 +49,13 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    # Используем простую строку подключения без проблемных символов
+    url = "postgresql+psycopg2://newsuser:newspass@localhost:5432/newsdb"
+    
     context.configure(
         url=url,
         target_metadata=target_metadata,
-        literal_binds=True,
+        literal_binds=False,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -63,8 +70,16 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # Используем строку подключения из настроек, но с синхронным драйвером для alembic
+    async_url = settings.DATABASE_URL
+    # Заменяем asyncpg на psycopg2 для alembic
+    url = async_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+    
+    configuration = config.get_section(config.config_ini_section, {})
+    configuration["sqlalchemy.url"] = url
+    
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
