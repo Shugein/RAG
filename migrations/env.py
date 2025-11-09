@@ -13,8 +13,8 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Импортируйте модели и настройки:
-from Parser.src.core.models import Base
-from Parser.src.core.config import settings
+from core.database.models import Base
+from core.database.config import settings
 
 # Установите target_metadata:
 target_metadata = Base.metadata

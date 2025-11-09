@@ -34,8 +34,8 @@ from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.config import settings
-from src.core.database import init_db, close_db, get_db_session
+from core.database.config import settings
+from core.database.database import init_db, close_db, get_db_session
 from services.aggregator.telegram.client import TelegramClientManager
 from services.aggregator.telegram.parser import Telegram_Parser
 from services.aggregator.telegram.antispam import AntiSpamFilter
@@ -45,14 +45,9 @@ from core.utils.logging import setup_logging
 from core.database.models import Source, News, SourceKind
 from core.graph.service import GraphService
 from services.aggregator.html.html_parser_service import HTMLParserService
-from Parser.entity_recognition import CachedFinanceNERExtractor
-try:
-    from Parser.entity_recognition_local import LocalFinanceNERExtractor
-except ImportError:
-    try:
-        from core.nlp.entity_recognition_local import LocalFinanceNERExtractor
-    except ImportError:
-        LocalFinanceNERExtractor = None
+from core.nlp.entity_recognition import CachedFinanceNERExtractor
+from core.nlp.entity_recognition_local import LocalFinanceNERExtractor
+
 from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
