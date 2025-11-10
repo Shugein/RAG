@@ -1,0 +1,293 @@
+services:
+  # === Weaviate RAG Stack ===
+  text2vec-transformers:
+    profiles: ["rag"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: berta-transformers
+    environment:
+      ENABLE_CUDA: "1"
+      NVIDIA_VISIBLE_DEVICES: "all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/meta"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks:
+      - rag-network
+
+  reranker-transformers:
+    profiles: ["rag"]
+    image: semitechnologies/reranker-transformers:baai-bge-reranker-v2-m3
+    container_name: bge-reranker
+    environment:
+      ENABLE_CUDA: "1"
+      NVIDIA_VISIBLE_DEVICES: "all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/.well-known/ready')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks:
+      - rag-network
+
+  weaviate:
+    profiles: ["rag"]
+    image: cr.weaviate.io/semitechnologies/weaviate:1.33.0
+    container_name: weaviate
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
+      - --scheme
+      - http
+    ports:
+      - "8083:8080"
+      - "50051:50051"
+    restart: unless-stopped
+    environment:
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      CLUSTER_HOSTNAME: "node1"
+      DEFAULT_VECTORIZER_MODULE: "text2vec-transformers"
+      ENABLE_MODULES: "text2vec-transformers,reranker-transformers"
+      TRANSFORMERS_INFERENCE_API: "http://text2vec-transformers:8080"
+      RERANKER_INFERENCE_API: "http://reranker-transformers:8080"
+      AUTOSCHEMA_ENABLED: "true"
+      LOG_LEVEL: "info"
+    volumes:
+      - weaviate-data:/var/lib/weaviate
+    depends_on:
+      text2vec-transformers:
+        condition: service_healthy
+      reranker-transformers:
+        condition: service_healthy
+    networks:
+      - rag-network
+
+  # === Parser Infrastructure ===
+  postgres:
+    profiles: ["parser", "infrastructure"]
+    image: postgres:15-alpine
+    container_name: news-postgres
+    environment:
+      POSTGRES_DB: newsdb
+      POSTGRES_USER: newsuser
+      POSTGRES_PASSWORD: newspass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U newsuser -d newsdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rag-network
+
+  rabbitmq:
+    profiles: ["parser", "infrastructure"]
+    image: rabbitmq:3.12-management-alpine
+    container_name: news-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rag-network
+
+  redis:
+    profiles: ["parser", "infrastructure"]
+    image: redis:7-alpine
+    container_name: news-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rag-network
+
+  neo4j:
+    profiles: ["parser", "graph"]
+    image: neo4j:5-community
+    container_name: radar-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/password123
+      NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
+    ports:
+      - "7474:7474"  # Browser
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - rag-network
+
+  # === Parser Services ===
+  telegram-parser:
+    profiles: ["parser"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.telegram
+    container_name: news-telegram-parser
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://newsuser:newspass@postgres:5432/newsdb
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/
+      REDIS_URL: redis://redis:6379/0
+      LOG_LEVEL: INFO
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config:ro
+      - ./sessions:/app/sessions
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  enricher:
+    profiles: ["parser"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enricher
+    container_name: news-enricher
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://newsuser:newspass@postgres:5432/newsdb
+      REDIS_URL: redis://redis:6379/1
+      LOG_LEVEL: INFO
+    env_file:
+      - .env
+    volumes:
+      - ./models:/app/models:ro
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  html-parser:
+    profiles: ["parser"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.html_parser
+    container_name: news-html-parser
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://newsuser:newspass@postgres:5432/newsdb
+      REDIS_URL: redis://redis:6379/3
+      LOG_LEVEL: INFO
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  outbox-relay:
+    profiles: ["parser"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.outbox
+    container_name: news-outbox-relay
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://newsuser:newspass@postgres:5432/newsdb
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/
+      LOG_LEVEL: INFO
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  api:
+    profiles: ["parser"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: news-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://newsuser:newspass@postgres:5432/newsdb
+      REDIS_URL: redis://redis:6379/2
+      LOG_LEVEL: INFO
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  weaviate-data:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:
+  neo4j_data:

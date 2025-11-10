@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#CFE9FF" stop-opacity="0.10"/>
+    </linearGradient>
+    <pattern id="dotgrid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#FFFFFF" opacity="0.15"/>
+      <circle cx="1" cy="19" r="1" fill="#FFFFFF" opacity="0.10"/>
+      <circle cx="19" cy="1" r="1" fill="#FFFFFF" opacity="0.10"/>
+      <circle cx="19" cy="19" r="1" fill="#FFFFFF" opacity="0.06"/>
+    </pattern>
+  </defs>
+  <g opacity="0.18" stroke="url(#g)">
+    <path d="M20 0 V200 M40 0 V200 M60 0 V200 M80 0 V200 M100 0 V200 M120 0 V200 M140 0 V200 M160 0 V200 M180 0 V200" fill="none"/>
+    <path d="M0 20 H200 M0 40 H200 M0 60 H200 M0 80 H200 M0 100 H200 M0 120 H200 M0 140 H200 M0 160 H200 M0 180 H200" fill="none"/>
+  </g>
+  <rect x="0" y="0" width="200" height="200" fill="url(#dotgrid)" />
+</svg>

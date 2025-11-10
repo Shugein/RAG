@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DE1FF"/>
+      <stop offset="100%" stop-color="#8A7DFF"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .o { fill: none; stroke: url(#grad); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .f { fill: url(#grad); }
+      .w { stroke: #FFFFFF; }
+      .a { fill: rgba(255,255,255,0.06); }
+    </style>
+  </defs>
+
+<rect x="2" y="2" width="44" height="44" rx="10" class="a" />
+<!-- axes -->
+<path d="M12 34 H36" class="o" opacity="0.35"/>
+<path d="M12 34 V14" class="o" opacity="0.35"/>
+<!-- line -->
+<path d="M12 30 L18 26 L24 28 L30 22 L36 18" class="o" filter="url(#glow)"/>
+<!-- points -->
+<circle cx="18" cy="26" r="2" class="f"/>
+<circle cx="24" cy="28" r="2" class="f"/>
+<circle cx="30" cy="22" r="2" class="f"/>
+<circle cx="36" cy="18" r="2" class="f"/>
+</svg>

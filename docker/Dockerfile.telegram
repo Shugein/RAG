@@ -1,0 +1,5 @@
+FROM news-aggregator-base:latest
+
+# Note: Telethon sessions are mounted via volume in docker-compose.yml
+
+CMD ["python", "workers/telegram_worker.py"]

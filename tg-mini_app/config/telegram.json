@@ -1,0 +1,91 @@
+{
+  "bot": {
+    "username": "@radar_finance_bot",
+    "token": "YOUR_BOT_TOKEN_HERE",
+    "webhook_url": "https://your-domain.com/webhook",
+    "webhook_secret": "YOUR_WEBHOOK_SECRET"
+  },
+  "mini_app": {
+    "url": "https://your-domain.com",
+    "short_name": "RADAR Finance",
+    "description": "Финансовая аналитика RADAR в Telegram",
+    "photo_url": "https://your-domain.com/static/icon.png"
+  },
+  "webapp": {
+    "theme_params": {
+      "use_telegram_theme": true,
+      "bg_color": "#ffffff",
+      "text_color": "#000000",
+      "hint_color": "#999999",
+      "link_color": "#2481cc",
+      "button_color": "#2481cc",
+      "button_text_color": "#ffffff"
+    },
+    "viewport": {
+      "height": "expand",
+      "stable_height": true
+    },
+    "header_color": "#2481cc",
+    "background_color": "#ffffff"
+  },
+  "features": {
+    "main_button": {
+      "enabled": true,
+      "text": "Обновить данные",
+      "color": "#2481cc",
+      "text_color": "#ffffff"
+    },
+    "back_button": {
+      "enabled": true,
+      "show_on_pages": ["search", "statistics", "news-detail"]
+    },
+    "haptic_feedback": {
+      "enabled": true,
+      "impact_style": "medium",
+      "notification_type": "success"
+    },
+    "cloud_storage": {
+      "enabled": false,
+      "max_size": 1024
+    }
+  },
+  "security": {
+    "validate_init_data": true,
+    "init_data_ttl": 86400,
+    "allowed_origins": [
+      "https://web.telegram.org",
+      "https://your-domain.com"
+    ]
+  },
+  "api_integration": {
+    "base_url": "/api",
+    "endpoints": {
+      "dashboard": "/dashboard",
+      "hot_news": "/hot-news",
+      "search": "/search",
+      "statistics": "/statistics",
+      "e_disclosure_news": "/e-disclosure/news",
+      "e_disclosure_messages": "/e-disclosure/messages"
+    },
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Requested-With": "TelegramWebApp"
+    }
+  },
+  "ui_customization": {
+    "show_telegram_user": true,
+    "show_close_button": false,
+    "confirm_close": false,
+    "smooth_button_animation": true
+  },
+  "development": {
+    "debug_mode": true,
+    "mock_telegram_user": {
+      "id": 123456789,
+      "first_name": "Test",
+      "last_name": "User",
+      "username": "testuser",
+      "language_code": "ru"
+    }
+  }
+}

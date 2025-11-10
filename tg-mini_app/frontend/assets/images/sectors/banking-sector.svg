@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DE1FF"/>
+      <stop offset="100%" stop-color="#8A7DFF"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .o { fill: none; stroke: url(#grad); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .f { fill: url(#grad); }
+      .w { stroke: #FFFFFF; }
+      .a { fill: rgba(255,255,255,0.06); }
+    </style>
+  </defs>
+
+<rect x="2" y="2" width="44" height="44" rx="10" class="a" />
+<!-- background growth lines -->
+<path d="M8 33 L16 27 L22 30 L30 23 L40 19" class="o" opacity="0.35" />
+<!-- pediment -->
+<path d="M8 18 L24 9 L40 18" class="o" filter="url(#glow)"/>
+<!-- base -->
+<rect x="10" y="34" width="28" height="3" class="f" rx="1.5"/>
+<!-- columns -->
+<path d="M14 21V34" class="o"/>
+<path d="M20 21V34" class="o"/>
+<path d="M26 21V34" class="o"/>
+<path d="M32 21V34" class="o"/>
+<!-- entablature -->
+<rect x="10" y="18" width="28" height="4" rx="1.5" class="f"/>
+</svg>

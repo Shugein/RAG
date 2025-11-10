@@ -1,0 +1,181 @@
+{
+  "sources": [
+    {
+      "id": "rbc",
+      "name": "RBC",
+      "display_name": "РБК",
+      "enabled": true,
+      "priority": 1,
+      "color": "#e74c3c",
+      "icon": "",
+      "description": "Ведущее российское информационное агентство",
+      "website": "https://www.rbc.ru",
+      "categories": ["economics", "business", "markets", "companies"],
+      "update_frequency": 300,
+      "parser_config": {
+        "path": "../parser/rbc_parser.py",
+        "enabled": true,
+        "last_update": null
+      }
+    },
+    {
+      "id": "vedomosti",
+      "name": "Vedomosti",
+      "display_name": "Ведомости",
+      "enabled": true,
+      "priority": 2,
+      "color": "#3498db",
+      "icon": "",
+      "description": "Деловая газета о бизнесе и экономике",
+      "website": "https://www.vedomosti.ru",
+      "categories": ["business", "economics", "finance", "analytics"],
+      "update_frequency": 600,
+      "parser_config": {
+        "path": "../parser_vedomosti/",
+        "enabled": true,
+        "last_update": null
+      }
+    },
+    {
+      "id": "kommersant",
+      "name": "Kommersant",
+      "display_name": "Коммерсант",
+      "enabled": true,
+      "priority": 3,
+      "color": "#2c3e50",
+      "icon": "",
+      "description": "Деловая газета и информационное агентство",
+      "website": "https://www.kommersant.ru",
+      "categories": ["business", "politics", "economics", "finance"],
+      "update_frequency": 900,
+      "parser_config": {
+        "path": "../parser_commersant/",
+        "enabled": true,
+        "last_update": null
+      }
+    },
+    {
+      "id": "moex",
+      "name": "MOEX",
+      "display_name": "Московская Биржа",
+      "enabled": true,
+      "priority": 4,
+      "color": "#27ae60",
+      "icon": "",
+      "description": "Официальные сообщения Московской биржи",
+      "website": "https://www.moex.com",
+      "categories": ["markets", "trading", "securities", "regulations"],
+      "update_frequency": 1800,
+      "parser_config": {
+        "path": "../parser_moex/",
+        "enabled": true,
+        "last_update": null
+      }
+    },
+    {
+      "id": "interfax",
+      "name": "Interfax",
+      "display_name": "Интерфакс",
+      "enabled": true,
+      "priority": 5,
+      "color": "#9b59b6",
+      "icon": "",
+      "description": "Информационное агентство Интерфакс",
+      "website": "https://www.interfax.ru",
+      "categories": ["news", "economics", "politics", "business"],
+      "update_frequency": 450,
+      "parser_config": {
+        "path": "../1_lap_parser/interfax_universal_collector.py",
+        "enabled": true,
+        "last_update": null
+      }
+    },
+    {
+      "id": "e_disclosure",
+      "name": "E-disclosure",
+      "display_name": "Е-раскрытие",
+      "enabled": true,
+      "priority": 6,
+      "color": "#f39c12",
+      "icon": "",
+      "description": "Система раскрытия корпоративной информации",
+      "website": "https://e-disclosure.ru",
+      "categories": ["corporate", "disclosure", "regulations", "companies"],
+      "update_frequency": 3600,
+      "parser_config": {
+        "path": "../collect_extended_securities.py",
+        "enabled": true,
+        "last_update": null
+      }
+    }
+  ],
+  "categories": [
+    {
+      "id": "economics",
+      "name": "Экономика",
+      "color": "#3498db",
+      "icon": "",
+      "description": "Макроэкономические новости и аналитика"
+    },
+    {
+      "id": "business",
+      "name": "Бизнес",
+      "color": "#2c3e50",
+      "icon": "",
+      "description": "Корпоративные новости и бизнес-события"
+    },
+    {
+      "id": "markets",
+      "name": "Рынки",
+      "color": "#27ae60",
+      "icon": "",
+      "description": "Финансовые рынки и биржевая торговля"
+    },
+    {
+      "id": "companies",
+      "name": "Компании",
+      "color": "#e74c3c",
+      "icon": "",
+      "description": "Новости публичных компаний"
+    },
+    {
+      "id": "regulations",
+      "name": "Регулирование",
+      "color": "#f39c12",
+      "icon": "",
+      "description": "Нормативные акты и регулирование"
+    },
+    {
+      "id": "analytics",
+      "name": "Аналитика",
+      "color": "#9b59b6",
+      "icon": "",
+      "description": "Аналитические материалы и исследования"
+    }
+  ],
+  "data_integration": {
+    "radar_data_path": "../final_radar_data/",
+    "moex_data_files": [
+      "../moex_all_securities_20250926_213541.json",
+      "../moex_all_isins_20250926_212808.json"
+    ],
+    "parser_outputs": [
+      "../parser/parsed_data/",
+      "../parser_vedomosti/",
+      "../parser_commersant/",
+      "../1_lap_parser/data/"
+    ],
+    "cache_settings": {
+      "enable_caching": true,
+      "cache_ttl": 1800,
+      "max_cache_size": "100MB"
+    }
+  },
+  "quality_metrics": {
+    "min_news_length": 50,
+    "max_news_age_days": 30,
+    "duplicate_threshold": 0.85,
+    "hotness_algorithm": "weighted_engagement",
+    "relevance_threshold": 0.7
+  }
+}

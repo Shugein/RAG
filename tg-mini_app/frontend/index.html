@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RADAR Finance</title>
+    
+    <!-- Telegram WebApp SDK -->
+    <scriptParser.src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <scriptParser.src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'radar-primary': '#1e40af',
+                        'radar-secondary': '#3b82f6',
+                        'radar-accent': '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .sector-btn.active {
+            background: rgba(255, 255, 255, 0.3) !important;
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-radar">
+    <!-- Main Application -->
+    <div id="app" class="min-h-screen">
+        <!-- Hero Section -->
+        <div class="relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.3) 1px, transparent 0); background-size: 40px 40px;"></div>
+            </div>
+            
+            <!-- Header -->
+            <header class="relative z-10 pt-8 pb-6">
+                <div class="max-w-4xl mx-auto px-6">
+                    <div class="flex items-center justify-between">
+                        <!-- Logo & Title -->
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center glassmorphism">
+                                <span class="text-2xl">📊</span>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-white">RADAR Finance</h1>
+                                <p class="text-white/80 text-sm">Финансовая аналитика</p>
+                            </div>
+                        </div>
+                        
+                        <!-- User Info -->
+                        <div class="flex items-center space-x-3" id="userInfo">
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center glassmorphism">
+                                <span class="text-white font-medium" id="userInitial">U</span>
+                            </div>
+                            <div class="hidden sm:block">
+                                <div class="text-white font-medium text-sm" id="userName">Пользователь</div>
+                                <div class="text-white/70 text-xs">Онлайн</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Query Interface -->
+            <main class="relative z-10 pb-20">
+                <div class="max-w-4xl mx-auto px-6">
+                    <!-- Welcome Message -->
+                    <div class="text-center mb-12 animate-fadeIn">
+                        <h2 class="text-4xl font-bold text-white mb-4">
+                            Добро пожаловать в 
+                            <span class="text-gradient">RADAR</span>
+                        </h2>
+                        <p class="text-white/90 text-lg max-w-2xl mx-auto leading-relaxed">
+                            Получайте актуальную финансовую аналитику и горячие данные по любому сектору экономики. 
+                            Просто задайте ваш вопрос естественным языком.
+                        </p>
+                    </div>
+
+                    <!-- Query Form -->
+                    <div class="max-w-3xl mx-auto mb-12 animate-slideUp">
+                        <div class="glassmorphism rounded-3xl p-8 shadow-2xl">
+                            <form id="queryForm" class="space-y-6">
+                                <!-- Query Input -->
+                                <div class="space-y-2">
+                                    <label for="queryInput" class="block text-white font-medium text-sm">
+                                        💬 Ваш запрос
+                                    </label>
+                                    <div class="relative">
+                                        <textarea 
+                                            id="queryInput" 
+                                            placeholder="Например: Выдай мне черновик и горячие данные по банковскому сектору за последнюю неделю..."
+                                            class="w-full h-32 px-4 py-3 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 resize-none backdrop-blur-sm"
+                                            maxlength="500"
+                                        ></textarea>
+                                        <div class="absolute bottom-3 right-3 text-white/50 text-xs" id="charCount">0/500</div>
+                                    </div>
+                                </div>
+
+                                <!-- Query Type Selection -->
+                                <div class="space-y-3">
+                                    <label class="block text-white font-medium text-sm">
+                                        🎯 Тип запроса
+                                    </label>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        <button type="button" class="query-type-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-type="draft">
+                                            � Черновик
+                                        </button>
+                                        <button type="button" class="query-type-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-type="hot">
+                                            🔥 Горячие
+                                        </button>
+                                        <button type="button" class="query-type-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-type="analytics">
+                                            📊 Аналитика
+                                        </button>
+                                        <button type="button" class="query-type-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-type="search">
+                                            🔍 Поиск
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Sector Selection -->
+                                <div class="space-y-3">
+                                    <label class="block text-white font-medium text-sm">
+                                        🏭 Сектор экономики
+                                    </label>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        <button type="button" class="sector-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-sector="banking">
+                                            🏦 Банки
+                                        </button>
+                                        <button type="button" class="sector-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-sector="energy">
+                                            ⚡ Энергетика
+                                        </button>
+                                        <button type="button" class="sector-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-sector="tech">
+                                            💻 IT/Технологии
+                                        </button>
+                                        <button type="button" class="sector-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-sector="metals">
+                                            🏭 Металлургия
+                                        </button>
+                                        <button type="button" class="sector-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-sector="retail">
+                                            🛒 Ритейл
+                                        </button>
+                                        <button type="button" class="sector-btn bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium transition-all duration-200 card-hover-effect" data-sector="all">
+                                            🌐 Все сектора
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="pt-4">
+                                    <button 
+                                        type="submit" 
+                                        id="submitBtn"
+                                        class="w-full bg-white hover:bg-white/90 text-radar-primary font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                    >
+                                        <span class="flex items-center justify-center space-x-2">
+                                            <span>🚀</span>
+                                            <span>Получить данные RADAR</span>
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="max-w-3xl mx-auto animate-slideUp" style="animation-delay: 0.2s;">
+                        <div class="text-center mb-6">
+                            <h3 class="text-white font-semibold text-lg mb-2">⚡ Быстрые действия</h3>
+                            <p class="text-white/70 text-sm">Популярные запросы одним кликом</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <button class="quick-action-btn glassmorphism rounded-2xl p-6 text-left hover:bg-white/20 transition-all duration-300 card-hover-effect" data-query="Горячие новости банковского сектора за сегодня">
+                                <div class="text-2xl mb-2">🏦</div>
+                                <div class="text-white font-medium mb-1">Банки сегодня</div>
+                                <div class="text-white/70 text-sm">Актуальные новости банковского сектора</div>
+                            </button>
+                            
+                            <button class="quick-action-btn glassmorphism rounded-2xl p-6 text-left hover:bg-white/20 transition-all duration-300 card-hover-effect" data-query="Аналитический обзор энергетического сектора с ключевыми трендами">
+                                <div class="text-2xl mb-2">⚡</div>
+                                <div class="text-white font-medium mb-1">Энергетика</div>
+                                <div class="text-white/70 text-sm">Тренды и аналитика энергосектора</div>
+                            </button>
+                            
+                            <button class="quick-action-btn glassmorphism rounded-2xl p-6 text-left hover:bg-white/20 transition-all duration-300 card-hover-effect" data-query="Топ новости всех секторов с рейтингом важности">
+                                <div class="text-2xl mb-2">📈</div>
+                                <div class="text-white font-medium mb-1">Топ новости</div>
+                                <div class="text-white/70 text-sm">Важнейшие события по всем секторам</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden min-h-screen bg-white">
+            <div class="max-w-6xl mx-auto px-6 py-8">
+                <!-- Results Header -->
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Результаты RADAR</h2>
+                        <p class="text-gray-600" id="queryDescription">Результаты вашего запроса</p>
+                    </div>
+                    <button id="backBtn" class="bg-radar-primary hover:bg-radar-secondary text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200">
+                        ← Новый запрос
+                    </button>
+                </div>
+
+                <!-- Results Content -->
+                <div id="resultsContent" class="space-y-6">
+                    <!-- Контент будет загружен динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div class="bg-white rounded-3xl p-8 max-w-sm mx-auto text-center glassmorphism">
+                <div class="animate-spin w-12 h-12 border-4 border-radar-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Обработка запроса</h3>
+                <p class="text-gray-600 text-sm">RADAR анализирует данные...</p>
+                <div class="mt-4 bg-gray-200 rounded-full h-2">
+                    <div class="bg-radar-primary h-2 rounded-full animate-pulse" style="width: 60%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <scriptParser.src="js/app.js"></script>
+</body>
+</html>

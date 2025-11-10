@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DE1FF"/>
+      <stop offset="100%" stop-color="#8A7DFF"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .o { fill: none; stroke: url(#grad); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .f { fill: url(#grad); }
+      .w { stroke: #FFFFFF; }
+      .a { fill: rgba(255,255,255,0.06); }
+    </style>
+  </defs>
+
+<rect x="2" y="2" width="44" height="44" rx="10" class="a" />
+<!-- ingot -->
+<path d="M10 30 L16 20 H34 L38 30 Z" class="o" filter="url(#glow)"/>
+<path d="M16 20 H34 L30 30 H12 Z" class="f" opacity="0.9"/>
+<!-- shine -->
+<path d="M22 16 L24 20" class="o"/>
+<path d="M28 14 L30 18" class="o"/>
+</svg>

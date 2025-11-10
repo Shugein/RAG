@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DE1FF"/>
+      <stop offset="100%" stop-color="#8A7DFF"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="b"/>
+      <feOffset in="b" dy="2" result="o"/>
+      <feColorMatrix in="o" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .20 0" result="s"/>
+      <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .tile {{ fill: #FFFFFF; }}
+      .o {{ fill: none; stroke: url(#grad); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }}
+      .dot {{ fill: url(#grad); }}
+    </style>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="48" ry="48" class="tile" filter="url(#shadow)"/>
+  <g transform="translate(0,0)">
+    <circle cx="128" cy="128" r="96" class="o"/>
+    <path d="M128 128 L208 48" class="o"/>
+    <circle cx="128" cy="128" r="8" class="dot"/>
+    <path d="M88 168 Q110 154 128 168" class="o"/>
+    <path d="M76 188 Q110 168 144 188" class="o" opacity="0.85"/>
+    <path d="M66 206 Q108 182 154 206" class="o" opacity="0.7"/>
+  </g>
+</svg>

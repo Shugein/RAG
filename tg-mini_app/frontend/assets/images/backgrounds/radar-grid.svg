@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DE1FF" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#8A7DFF" stop-opacity="0.85"/>
+    </linearGradient>
+    <style>
+      .c { fill: none; stroke: url(#grad); stroke-width: 1.5; opacity: 0.25; }
+      .r { fill: none; stroke: url(#grad); stroke-width: 1.2; opacity: 0.35; }
+      .t { fill: none; stroke: url(#grad); stroke-width: 2; opacity: 0.6; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="400" height="400" fill="none"/>
+  <g>
+    <circle class="c" cx="200" cy="200" r="40"/>
+    <circle class="c" cx="200" cy="200" r="80"/>
+    <circle class="c" cx="200" cy="200" r="120"/>
+    <circle class="c" cx="200" cy="200" r="160"/>
+    <circle class="c" cx="200" cy="200" r="200"/>
+  </g>
+  <g>
+    <path class="r" d="M200 200 L400.00 200.00"/>
+    <path class="r" d="M200 200 L373.21 300.00"/>
+    <path class="r" d="M200 200 L300.00 373.21"/>
+    <path class="r" d="M200 200 L200.00 400.00"/>
+    <path class="r" d="M200 200 L100.00 373.21"/>
+    <path class="r" d="M200 200 L26.79 300.00"/>
+    <path class="r" d="M200 200 L0.00 200.00"/>
+    <path class="r" d="M200 200 L26.79 100.00"/>
+    <path class="r" d="M200 200 L100.00 26.79"/>
+    <path class="r" d="M200 200 L200.00 0.00"/>
+    <path class="r" d="M200 200 L300.00 26.79"/>
+    <path class="r" d="M200 200 L373.21 100.00"/>
+  </g>
+  <g>
+    <path class="t" d="M392.00 200.00 L400.00 200.00" stroke-width="2"/>
+    <path class="r" d="M392.04 233.86 L396.96 234.73" stroke-width="1.2"/>
+    <path class="r" d="M383.24 266.69 L387.94 268.40" stroke-width="1.2"/>
+    <path class="t" d="M366.28 296.00 L373.21 300.00" stroke-width="2"/>
+    <path class="r" d="M349.38 325.34 L353.21 328.56" stroke-width="1.2"/>
+    <path class="r" d="M325.34 349.38 L328.56 353.21" stroke-width="1.2"/>
+    <path class="t" d="M296.00 366.28 L300.00 373.21" stroke-width="2"/>
+    <path class="r" d="M266.69 383.24 L268.40 387.94" stroke-width="1.2"/>
+    <path class="r" d="M233.86 392.04 L234.73 396.96" stroke-width="1.2"/>
+    <path class="t" d="M200.00 392.00 L200.00 400.00" stroke-width="2"/>
+    <path class="r" d="M166.14 392.04 L165.27 396.96" stroke-width="1.2"/>
+    <path class="r" d="M133.31 383.24 L131.60 387.94" stroke-width="1.2"/>
+    <path class="t" d="M104.00 366.28 L100.00 373.21" stroke-width="2"/>
+    <path class="r" d="M74.66 349.38 L71.44 353.21" stroke-width="1.2"/>
+    <path class="r" d="M50.62 325.34 L46.79 328.56" stroke-width="1.2"/>
+    <path class="t" d="M33.72 296.00 L26.79 300.00" stroke-width="2"/>
+    <path class="r" d="M16.76 266.69 L12.06 268.40" stroke-width="1.2"/>
+    <path class="r" d="M7.96 233.86 L3.04 234.73" stroke-width="1.2"/>
+    <path class="t" d="M8.00 200.00 L0.00 200.00" stroke-width="2"/>
+    <path class="r" d="M7.96 166.14 L3.04 165.27" stroke-width="1.2"/>
+    <path class="r" d="M16.76 133.31 L12.06 131.60" stroke-width="1.2"/>
+    <path class="t" d="M33.72 104.00 L26.79 100.00" stroke-width="2"/>
+    <path class="r" d="M50.62 74.66 L46.79 71.44" stroke-width="1.2"/>
+    <path class="r" d="M74.66 50.62 L71.44 46.79" stroke-width="1.2"/>
+    <path class="t" d="M104.00 33.72 L100.00 26.79" stroke-width="2"/>
+    <path class="r" d="M133.31 16.76 L131.60 12.06" stroke-width="1.2"/>
+    <path class="r" d="M166.14 7.96 L165.27 3.04" stroke-width="1.2"/>
+    <path class="t" d="M200.00 8.00 L200.00 0.00" stroke-width="2"/>
+    <path class="r" d="M233.86 7.96 L234.73 3.04" stroke-width="1.2"/>
+    <path class="r" d="M266.69 16.76 L268.40 12.06" stroke-width="1.2"/>
+    <path class="t" d="M296.00 33.72 L300.00 26.79" stroke-width="2"/>
+    <path class="r" d="M325.34 50.62 L328.56 46.79" stroke-width="1.2"/>
+    <path class="r" d="M349.38 74.66 L353.21 71.44" stroke-width="1.2"/>
+    <path class="t" d="M366.28 104.00 L373.21 100.00" stroke-width="2"/>
+    <path class="r" d="M383.24 133.31 L387.94 131.60" stroke-width="1.2"/>
+    <path class="r" d="M392.04 166.14 L396.96 165.27" stroke-width="1.2"/>
+  </g>
+</svg>
