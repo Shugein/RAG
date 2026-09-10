@@ -211,6 +211,7 @@ class EventExtractor:
         Returns:
             True если якорное
         """
+        #TODO: Добавить дополнительные критерии для определения якорных событий?
         # Якорные типы событий (из domain priors ТЗ раздел 9)
         anchor_types = {
             "sanctions",

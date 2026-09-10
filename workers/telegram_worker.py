@@ -1,4 +1,4 @@
-# scripts/start_telegram_parser_ceg.py
+# \workers\telegram_worker.py
 """
 🚀 УЛУЧШЕННЫЙ TELEGRAM PARSER с BATCH обработкой и полным CEG анализом
 
@@ -49,7 +49,7 @@ from core.nlp.entity_recognition import CachedFinanceNERExtractor
 from core.nlp.entity_recognition_local import LocalFinanceNERExtractor
 
 from sqlalchemy import select
-
+api_key = os.getenv("API_KEY_2") or os.getenv("OPENAI_API_KEY")
 logger = logging.getLogger(__name__)
 
 

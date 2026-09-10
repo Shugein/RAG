@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine
 )
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import NullPool
 from sqlalchemy import event, pool, text
 
 from core.database.config import settings
@@ -51,62 +51,68 @@ async def create_engine_with_settings() -> AsyncEngine:
         AsyncEngine: Настроенный engine для работы с БД
     """
     
-    # Определяем класс пула в зависимости от режима работы
+    # Определяем параметры пула в зависимости от режима работы
+    pool_config = {}
     if settings.TESTING:
         # В тестах используем NullPool - без пулинга
         # Каждый запрос создает новое подключение
-        poolclass = NullPool
-    else:
-        # В продакшене используем QueuePool - эффективный пул подключений
-        poolclass = QueuePool
-    
-    # Создаем асинхронный engine
-    engine = create_async_engine(
-        # URL подключения из настроек
-        # Формат: postgresql+asyncpg://user:pass@host:port/dbname
-        settings.DATABASE_URL,
-        
-        # Эхо SQL-запросов в логи (только в DEBUG режиме)
-        echo=settings.DEBUG,
-        
-        # Настройки пула подключений
-        poolclass=poolclass,
-        
-        # Размер пула - количество постоянных подключений
-        # Эти подключения держатся открытыми и переиспользуются
-        pool_size=settings.DB_POOL_SIZE,  # default: 20
-        
-        # Максимальный overflow - дополнительные подключения при нагрузке
-        # Создаются при необходимости и закрываются после использования
-        max_overflow=settings.DB_MAX_OVERFLOW,  # default: 40
-        
-        # Таймаут получения подключения из пула (в секундах)
-        # Если все подключения заняты, ждем указанное время
-        pool_timeout=settings.DB_POOL_TIMEOUT,  # default: 30
-        
-        # Проверка подключения перед использованием
-        # Отправляет SELECT 1 перед каждым использованием подключения
-        pool_pre_ping=True,
-        
-        # Время жизни подключения в секундах (2 часа)
-        # После этого времени подключение пересоздается
-        pool_recycle=7200,
-        
-        # Дополнительные параметры для asyncpg драйвера
-        connect_args={
-            # Таймаут на установку подключения
+        pool_config["poolclass"] = NullPool
+    # Для продакшена не указываем poolclass явно
+    # SQLAlchemy автоматически использует AsyncAdaptedQueuePool для async engine
+
+    # Определяем connect_args в зависимости от типа БД
+    connect_args = {}
+    if "postgresql" in settings.DATABASE_URL:
+        # Параметры для PostgreSQL с asyncpg драйвером
+        connect_args = {
             "server_settings": {
                 "application_name": "news_aggregator",
                 "client_encoding": "UTF8"
             },
             "command_timeout": 60,
-            
-            # Подготовленные statements для ускорения запросов
-            "prepared_statement_cache_size": 0,  # Отключаем для избежания проблем
-            
+            "prepared_statement_cache_size": 0,
             # SSL настройки (если нужно)
             # "ssl": "require",
         }
+    elif "sqlite" in settings.DATABASE_URL:
+        # Параметры для SQLite с aiosqlite драйвером
+        connect_args = {
+            "check_same_thread": False,  # Разрешаем использование из разных потоков
+        }
+
+    # Создаем асинхронный engine
+    engine = create_async_engine(
+        # URL подключения из настроек
+        settings.DATABASE_URL,
+
+        # Эхо SQL-запросов в логи (только в DEBUG режиме)
+        echo=settings.DEBUG,
+
+        # Настройки пула подключений
+        **pool_config,
+
+        # Размер пула - количество постоянных подключений
+        # Эти подключения держатся открытыми и переиспользуются
+        pool_size=settings.DB_POOL_SIZE,  # default: 20
+
+        # Максимальный overflow - дополнительные подключения при нагрузке
+        # Создаются при необходимости и закрываются после использования
+        max_overflow=settings.DB_MAX_OVERFLOW,  # default: 40
+
+        # Таймаут получения подключения из пула (в секундах)
+        # Если все подключения заняты, ждем указанное время
+        pool_timeout=settings.DB_POOL_TIMEOUT,  # default: 30
+
+        # Проверка подключения перед использованием
+        # Отправляет SELECT 1 перед каждым использованием подключения
+        pool_pre_ping=True,
+
+        # Время жизни подключения в секундах (2 часа)
+        # После этого времени подключение пересоздается
+        pool_recycle=7200,
+
+        # Дополнительные параметры зависят от типа БД
+        connect_args=connect_args
     )
     
     return engine
